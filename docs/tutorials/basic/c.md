@@ -3,31 +3,31 @@ layout: docs
 title: gRPC Basics - C++
 ---
 
-<h1 class="page-header">gRPC Basics: C++</h1>
+<h1 class="page-header">gRPC基础: C++</h1>
 
-<p class="lead">This tutorial provides a basic C++ programmer's introduction to working with gRPC.</p>
+<p class="lead">本教程提供了C++程序员如何使用gRPC的介绍.</p>
 
-By walking through this example you'll learn how to:
+通过学习教程中例子，你可以学会如何:
 
-- Define a service in a .proto file.
-- Generate server and client code using the protocol buffer compiler.
-- Use the C++ gRPC API to write a simple client and server for your service.
+- 在一个.proto定义服务.
+- 用protocol buffer编译器生成服务器和客户端代码.
+- 使用gRPC的C++ API为你的服务实现一个简单的客户端和服务器.
 
-It assumes that you have read the [Overview](/docs/index.html) and are familiar with [protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). Note that the example in this tutorial uses the proto3 version of the protocol buffers language, which is currently in alpha release: you can find out more in the [proto3 language guide](https://developers.google.com/protocol-buffers/docs/proto3) and see the [release notes](https://github.com/google/protobuf/releases) for the new version in the protocol buffers Github repository.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是protocol buffers语言的proto3版本,它目前只是alpha版:可以在[proto3语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和protocol buffers 的Github仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
 
-This isn't a comprehensive guide to using gRPC in C++: more reference documentation is coming soon.
+这算不上是一个在C++中使用gRPC的综合指南:以后会有更多的参考文档.
 
 <div id="toc"></div>
 
-## Why use gRPC?
+## 为什么使用gRPC?
 
-Our example is a simple route mapping application that lets clients get information about features on their route, create a summary of their route, and exchange route information such as traffic updates with the server and other clients.
+我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
-With gRPC we can define our service once in a .proto file and implement clients and servers in any of gRPC's supported languages, which in turn can be run in environments ranging from servers inside Google to your own tablet - all the complexity of communication between different languages and environments is handled for you by gRPC. We also get all the advantages of working with protocol buffers, including efficient serialization, a simple IDL, and easy interface updating.
+有了gRPC, 我们可以一次性的在一个.proto文件中定义服务并使用任何支持它的语言去实现客户端和服务器,反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑-gRPC帮你解决了不同语言间通信的复杂性以及环境的不同.使用protocol buffers还能获得其他好处，包括高效的序列号，简单的IDL以及容易进行接口更新。
 
-## Example code and setup
+## 例子代码和设置
 
-The example code for our tutorial is in [grpc/grpc/examples/cpp/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide). To download the example, clone the `grpc` repository by running the following command:
+教程的代码在这里 [grpc/grpc/examples/cpp/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide). 要下载例子，通过运行下面的命令去克隆`grpc`代码库:
 ```
 $ git clone https://github.com/grpc/grpc.git
 ```
@@ -111,7 +111,7 @@ For simplicity, we've provided a [makefile](https://github.com/grpc/grpc/blob/{{
 $ make route_guide.grpc.pb.cc route_guide.pb.cc
 ```
 
-which actually runs:
+实际上运行的是:
 
 ```
 $ protoc -I ../../protos --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ../../protos/route_guide.proto
@@ -380,4 +380,3 @@ Run the client (in a different terminal):
 ```
 $ ./route_guide_client
 ```
-

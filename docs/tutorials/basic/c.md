@@ -32,19 +32,18 @@ title: gRPC Basics - C++
 $ git clone https://github.com/grpc/grpc.git
 ```
 
-Then change your current directory to `examples/cpp/route_guide`:
+改变当前的目录到`examples/cpp/route_guide`:
 ```
 $ cd examples/cpp/route_guide
 ```
 
-You also should have the relevant tools installed to generate the server and client interface code - if you don't already, follow the setup instructions in [the C++ quick start guide](/docs/installation/c.html).
+你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，查看下面的设置指南[ C++快速开始指南](/docs/installation/c.html)。
 
 
-## Defining the service
+## 定义服务
+我们的第一步(可以从[概览](/docs/index.html)中得知)是使用[protocol buffers] (https://developers.google.com/protocol-buffers/docs/overview)去定义gRPC *service* 和方法 *request* 以及 *response* 的类型。你可以在[`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto)看到完整的 .proto 文件。
 
-Our first step (as you'll know from the [Overview](/docs/index.html)) is to define the gRPC *service* and the method *request* and *response* types using [protocol buffers] (https://developers.google.com/protocol-buffers/docs/overview). You can see the complete .proto file in [`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto).
-
-To define a service, you specify a named `service` in your .proto file:
+要定义一个服务，你必须在你的.proto文件中指定`service`:
 
 ```
 service RouteGuide {
@@ -52,16 +51,16 @@ service RouteGuide {
 }
 ```
 
-Then you define `rpc` methods inside your service definition, specifying their request and response types. gRPC lets you define four kinds of service method, all of which are used in the `RouteGuide` service:
+然后再你的服务中定义`rpc`方法，指定请求的和响应类型。gRPC允许你定义4种类型的service方法，在`RouteGuide`服务中都有使用：
 
-- A *simple RPC* where the client sends a request to the server using the stub and waits for a response to come back, just like a normal function call.
+- 一个 *simple RPC* ， 客户端使用桩发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
 ```
    // Obtains the feature at a given position.
    rpc GetFeature(Point) returns (Feature) {}
 ```
 
-- A *server-side streaming RPC* where the client sends a request to the server and gets a stream to read a sequence of messages back. The client reads from the returned stream until there are no more messages. As you can see in our example, you specify a server-side streaming method by placing the `stream` keyword before the *response* type.
+- 一个 *server-side streaming RPC* ， 客户端发送请求到服务器，拿到一个流去读取返回的消息序列。 客户端读取返回的流，直到里面没有任何消息。从例子中可以看出，通过在 *response* 类型前插入`stream`关键字，可以指定一个服务器端的流方法。
 
 ```
   // Obtains the Features available within the given Rectangle.  Results are
@@ -71,7 +70,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc ListFeatures(Rectangle) returns (stream Feature) {}
 ```
 
-- A *client-side streaming RPC* where the client writes a sequence of messages and sends them to the server, again using a provided stream. Once the client has finished writing the messages, it waits for the server to read them all and return its response. You specify a client-side streaming method by placing the `stream` keyword before the *request* type.
+- 一个 *client-side streaming RPC* ， 客户端写入一个消息序列并将其发送到服务器，同样也是使用流。一旦客户端完成写入消息，它等待服务器完成读取返回它的响应。通过在 *request* 类型前指定 `stream`关键字来指定一个客户端的流方法。
 
 ```
   // Accepts a stream of Points on a route being traversed, returning a
@@ -79,7 +78,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RecordRoute(stream Point) returns (RouteSummary) {}
 ```
 
-- A *bidirectional streaming RPC* where both sides send a sequence of messages using a read-write stream. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved. You specify this type of method by placing the `stream` keyword before both the request and the response.
+- 一个 *bidirectional streaming RPC* 是双方使用读写流去发送一个消息序列。两个流独立操作，因此客户端和服务器可以以任意喜欢的顺序读写：比如， The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved. You specify this type of method by placing the `stream` keyword before both the request and the response.
 
 ```
   // Accepts a stream of RouteNotes sent while a route is being traversed,
@@ -101,7 +100,7 @@ message Point {
 ```
 
 
-## Generating client and server code
+## 生成客户端和服务器端代码
 
 Next we need to generate the gRPC client and server interfaces from our .proto service definition. We do this using the protocol buffer compiler `protoc` with a special gRPC C++ plugin.
 
@@ -252,7 +251,7 @@ As you can see, we build and start our server using a `ServerBuilder`. To do thi
 
 In this section, we'll look at creating a C++ client for our `RouteGuide` service. You can see our complete example client code in [examples/cpp/route_guide/route_guide_client.cc](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/route_guide_client.cc).
 
-### Creating a stub
+### 创建一个桩
 
 To call service methods, we first need to create a *stub*.
 
@@ -273,13 +272,13 @@ Now we can use the channel to create our stub using the `NewStub` method provide
   }
 ```
 
-### Calling service methods
+### 调用服务的方法
 
 Now let's look at how we call our service methods. Note that in this tutorial we're calling the *blocking/synchronous* versions of each method: this means that the RPC call waits for the server to respond, and will either return a response or raise an exception.
 
-#### Simple RPC
+#### 简单RPC
 
-Calling the simple RPC `GetFeature` is nearly as straightforward as calling a local method.
+调用简单RPC `GetFeature`几乎是和调用一个本地方法一样直观。
 
 ```cpp
   Point point;
@@ -295,8 +294,7 @@ Calling the simple RPC `GetFeature` is nearly as straightforward as calling a lo
     ...
   }
 ```
-
-As you can see, we create and populate a request protocol buffer object (in our case `Point`), and create a response protocol buffer object for the server to fill in. We also create a `ClientContext` object for our call - you can optionally set RPC configuration values on this object, such as deadlines, though for now we'll use the default settings. Note that you cannot reuse this object between calls. Finally, we call the method on the stub, passing it the context, request, and response. If the method returns `OK`, then we can read the response information from the server from our response object.
+如你所见，我们创建并且填充了一个请求的protocol buffer对象（例子中为`Point`），同时为了服务器填写创建了一个响应protocol buffer对象。为了调用我们还创建了一个`ClientContext`对象-你可以随意的设置该对象上的配置的值，比如期限，虽然现在我们会使用缺省的设置。注意，你不能在不同的调用间重复使用这个对象。最后，我们在桩上调用这个方法，将其传给上下文，请求以及响应。如果方法的返回是`OK`，那么我们就可以从服务器从我们的响应对象中读取响应信息。
 
 ```cpp
       std::cout << "Found feature called " << feature->name()  << " at "
@@ -304,9 +302,9 @@ As you can see, we create and populate a request protocol buffer object (in our 
                 << feature->location().longitude()/kCoordFactor_ << std::endl;
 ```
 
-#### Streaming RPCs
+#### 流式RPC
 
-Now let's look at our streaming methods. If you've already read [Creating the server](#server) some of this may look very familiar - streaming RPCs are implemented in a similar way on both sides. Here's where we call the server-side streaming method `ListFeatures`, which returns a stream of geographical `Feature`s:
+现在来看看我们的流方法。如果你已经读过[创建服务器](#server)，本节的一些内容看上去很熟悉-流式RPC是在客户端和服务器两端以一种类似的方式实现的。下面就是我们称作是服务器端的流方法`ListFeatures`，它会返回地理的`Feature`：
 
 ```cpp
     std::unique_ptr<ClientReader<Feature> > reader(
@@ -319,10 +317,9 @@ Now let's look at our streaming methods. If you've already read [Creating the se
     }
     Status status = reader->Finish();
 ```
+我们将方法传给上下文并且请求，得到`ClientReader`返回对象，而不是将方法传给上下文，请求和响应。客户端可以使用`ClientReader`去读取服务器的响应。我们使用`ClientReader`的`Read()`反复读取服务器的响应到一个响应protocol buffer对象(在这个例子中是一个`Feature`)，直到没有更多的消息：客户端需要去检查每次调用完`Read()`方法的返回值。如果返回值为`true`，流依然存在并且可以持续读取；如果是`false`，说明消息流已经结束。最后，我们在流上调用`Finish()`方法结束调用并获取我们RPC的状态。
 
-Instead of passing the method a context, request, and response, we pass it a context and request and get a `ClientReader` object back. The client can use the `ClientReader` to read the server's responses. We use the `ClientReader`s `Read()` method to repeatedly read in the server's responses to a response protocol buffer object (in this case a `Feature`) until there are no more messages: the client needs to check the return value of `Read()` after each call. If `true`, the stream is still good and it can continue reading; if `false` the message stream has ended. Finally, we call `Finish()` on the stream to complete the call and get our RPC status.
-
-The client-side streaming method `RecordRoute` is similar, except there we pass the method a context and response object and get back a `ClientWriter`.
+客户端的流方法`RecordRoute`的使用很相似，除了我们将方法传给一个上下文和响应对象，拿到一个`ClientWriter`返回。
 
 ```cpp
     std::unique_ptr<ClientWriter<Point> > writer(
@@ -352,30 +349,29 @@ The client-side streaming method `RecordRoute` is similar, except there we pass 
     }
 ```
 
-Once we've finished writing our client's requests to the stream using `Write()`, we need to call `WritesDone()` on the stream to let gRPC know that we've finished writing, then `Finish()` to complete the call and get our RPC status. If the status is `OK`, our response object that we initially passed to `RecordRoute()` will be populated with the server's response.
+一旦我们用`Write()`将客户端请求写入到流的动作完成，我们需要在流上调用`WritesDone()`通知gRPC我们已经完成写入，然后调用`Finish()`完成调用同时拿到RPC的状态。如果状态是`OK`，我们最初传给`RecordRoute()`的响应对象会跟着服务器的响应被填充。
 
-Finally, let's look at our bidirectional streaming RPC `RouteChat()`. In this case, we just pass a context to the method and get back a `ClientReaderWriter`, which we can use to both write and read messages.
+最后，让我们看看双向流RPC`RouteChat()`。在这种场景下，我们将上下文传给一个方法，拿到一个可以用来读写消息的`ClientReaderWriter`的返回。
 
 ```cpp
     std::shared_ptr<ClientReaderWriter<RouteNote, RouteNote> > stream(
         stub_->RouteChat(&context));
 ```
+这里读写的语法和我们客户端流以及服务器端流方法没有任何区别。虽然每一方都能按照写入时的顺序拿到另一方的消息，客户端和服务器端都可以以任意顺序读写-流操作起来是完全独立的。
 
-The syntax for reading and writing here is exactly the same as for our client-streaming and server-streaming methods. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
+## 来试试吧！
 
-## Try it out!
-
-Build client and server:
+构建客户端和服务器:
 
 ```
 $ make
 ```
-Run the server, which will listen on port 50051:
+运行服务器，它会监听50051端口：
 
 ```
 $ ./route_guide_server
 ```
-Run the client (in a different terminal):
+在另外一个终端运行客户端：
 
 ```
 $ ./route_guide_client

@@ -53,14 +53,14 @@ service RouteGuide {
 
 然后再你的服务中定义`rpc`方法，指定请求的和响应类型。gRPC允许你定义4种类型的service方法，在`RouteGuide`服务中都有使用：
 
-- 一个 *simple RPC* ， 客户端使用桩发送请求到服务器并等待响应返回，就像平常的函数调用一样。
+- 一个 *简单RPC* ， 客户端使用桩发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
 ```
    // Obtains the feature at a given position.
    rpc GetFeature(Point) returns (Feature) {}
 ```
 
-- 一个 *server-side streaming RPC* ， 客户端发送请求到服务器，拿到一个流去读取返回的消息序列。 客户端读取返回的流，直到里面没有任何消息。从例子中可以看出，通过在 *response* 类型前插入`stream`关键字，可以指定一个服务器端的流方法。
+- 一个 *服务器端流RPC* ， 客户端发送请求到服务器，拿到一个流去读取返回的消息序列。 客户端读取返回的流，直到里面没有任何消息。从例子中可以看出，通过在 *响应* 类型前插入`stream`关键字，可以指定一个服务器端的流方法。
 
 ```
   // Obtains the Features available within the given Rectangle.  Results are
@@ -70,7 +70,7 @@ service RouteGuide {
   rpc ListFeatures(Rectangle) returns (stream Feature) {}
 ```
 
-- 一个 *client-side streaming RPC* ， 客户端写入一个消息序列并将其发送到服务器，同样也是使用流。一旦客户端完成写入消息，它等待服务器完成读取返回它的响应。通过在 *request* 类型前指定 `stream`关键字来指定一个客户端的流方法。
+- 一个 *客户端流RPC* ， 客户端写入一个消息序列并将其发送到服务器，同样也是使用流。一旦客户端完成写入消息，它等待服务器完成读取返回它的响应。通过在 *请求* 类型前指定 `stream`关键字来指定一个客户端的流方法。
 
 ```
   // Accepts a stream of Points on a route being traversed, returning a
@@ -78,7 +78,7 @@ service RouteGuide {
   rpc RecordRoute(stream Point) returns (RouteSummary) {}
 ```
 
-- 一个 *bidirectional streaming RPC* 是双方使用读写流去发送一个消息序列。两个流独立操作，因此客户端和服务器可以以任意喜欢的顺序读写：比如， The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved. You specify this type of method by placing the `stream` keyword before both the request and the response.
+- 一个 *双向流RPC* 是双方使用读写流去发送一个消息序列。两个流独立操作，因此客户端和服务器可以以任意喜欢的顺序读写：比如， 服务器可以在写入响应前等待接收所有的客户端消息，或者可以交替的读取和写入消息，或者其他读写的组合。 每个流中的消息顺序被预留。你可以通过在请求和响应前加`stream`关键字去制定方法的类型。
 
 ```
   // Accepts a stream of RouteNotes sent while a route is being traversed,
@@ -86,7 +86,7 @@ service RouteGuide {
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-Our .proto file also contains protocol buffer message type definitions for all the request and response types used in our service methods - for example, here's the `Point` message type:
+我们的 .proto 文件也包含了所有请求的protocol buffer消息类型定义以及在服务方法中使用的响应类型-比如，下面的`Point`消息类型：
 
 ```
 // Points are represented as latitude-longitude pairs in the E7 representation
@@ -102,9 +102,9 @@ message Point {
 
 ## 生成客户端和服务器端代码
 
-Next we need to generate the gRPC client and server interfaces from our .proto service definition. We do this using the protocol buffer compiler `protoc` with a special gRPC C++ plugin.
+接下来我们需要从.proto的服务定义中生成gRPC客户端和服务器端的接口。我们通过protocol buffer的编译器`protoc`以及一个特殊的gRPC C++插件来完成。
 
-For simplicity, we've provided a [makefile](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/Makefile) that runs `protoc` for you with the appropriate plugin, input, and output (if you want to run this yourself, make sure you've installed protoc and followed the gRPC code [installation instructions](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/INSTALL) first):
+简单起见，我们提供一个用合适的插件，输入，输出去运行`protoc`的[makefile](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/Makefile) (如果你想自己去运行，确保你已经安装了protoc和下面的gRPC代码[安装指南](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/INSTALL)):
 
 ```
 $ make route_guide.grpc.pb.cc route_guide.pb.cc
@@ -116,43 +116,45 @@ $ make route_guide.grpc.pb.cc route_guide.pb.cc
 $ protoc -I ../../protos --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ../../protos/route_guide.proto
 $ protoc -I ../../protos --cpp_out=. ../../protos/route_guide.proto
 ```
+运行这个命令可以在当前目录中生成下面的文件：
+- `route_guide.pb.h`, 声明生成的消息类的头文件
+- `route_guide.pb.cc`, 包含消息类的实现
+- `route_guide.grpc.pb.h`, 声明你生成的服务类的头文件
+- `route_guide.grpc.pb.cc`, 包含服务类的实现
 
-Running this command generates the following files in your current directory:
-- `route_guide.pb.h`, the header which declares your generated message classes
-- `route_guide.pb.cc`, which contains the implementation of your message classes
-- `route_guide.grpc.pb.h`, the header which declares your generated service classes
-- `route_guide.grpc.pb.cc`, which contains the implementation of your service classes
-
-These contain:
-- All the protocol buffer code to populate, serialize, and retrieve our request and response message types
-- A class called `RouteGuide` that contains
-   - a remote interface type (or *stub*) for clients to call with the methods defined in the `RouteGuide` service.
-   - two abstract interfaces for servers to implement, also with the methods defined in the `RouteGuide` service.
+这些包括：
+- 所有的填充，序列化和获取我们请求和响应消息类型的protocol buffer代码
+- 名为`RouteGuide`的类，包含
+   - 为了客户端去调用定义在`RouteGuide`服务的远程接口类型(或者 *桩* )
+   - 让服务器去实现的两个抽象接口，同时包括定义在`RouteGuide`中的方法。
 
 
 <a name="server"></a>
-## Creating the server
+## 创建服务器
 
-First let's look at how we create a `RouteGuide` server. If you're only interested in creating gRPC clients, you can skip this section and go straight to [Creating the client](#client) (though you might find it interesting anyway!).
+首先来看看我们如何创建一个`RouteGuide`服务器。如果你只对创建gRPC客户端感兴趣，你可以跳过这个部分，直接到[创建客户端](#client) (当然你也可能发现它也很有意思)。
 
-There are two parts to making our `RouteGuide` service do its job:
-- Implementing the service interface generated from our service definition: doing the actual "work" of our service.
-- Running a gRPC server to listen for requests from clients and return the service responses.
+让`RouteGuide`服务工作有两个部分：
+- 实现我们服务定义的生成的服务接口：做我们的服务的实际的“工作”。
+- 运行一个gRPC服务器，监听来自客户端的请求并返回服务的响应。
 
-You can find our example `RouteGuide` server in [examples/cpp/route_guide/route_guide_server.cc](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/route_guide_server.cc). Let's take a closer look at how it works.
+你可以从[examples/cpp/route_guide/route_guide_server.cc](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/route_guide_server.cc)看到我们的`RouteGuide`服务器的实现代码。近距离研究它是如何工作的。
 
-### Implementing RouteGuide
+}}/examples/cpp/route_guide/route_guide_server.cc). Let's take a closer look at how it works.
 
-As you can see, our server has a `RouteGuideImpl` class that implements the generated `RouteGuide::Service` interface:
+### 实现RouteGuide
+
+我们可以看出，服务器有一个实现了生成的`RouteGuide::Service`接口的`RouteGuideImpl`类：
 
 ```cpp
 class RouteGuideImpl final : public RouteGuide::Service {
 ...
 }
 ```
-In this case we're implementing the *synchronous* version of `RouteGuide`, which provides our default gRPC server behaviour. It's also possible to implement an asynchronous interface, `RouteGuide::AsyncService`, which allows you to further customize your server's threading behaviour, though we won't look at this in this tutorial.
 
-`RouteGuideImpl` implements all our service methods. Let's look at the simplest type first, `GetFeature`, which just gets a `Point` from the client and returns the corresponding feature information from its database in a `Feature`.
+在这个场景下，我们正在实现 *同步* 版本的`RouteGuide`，它提供了gRPC服务器缺省的行为。同时，也有可能去实现一个异步的接口`RouteGuide::AsyncService`，它允许你进一步定制服务器线程的行为，虽然在本教程中我们并不关注这点。
+
+`RouteGuideImpl`实现了所有的服务方法。让我们先来看看最简单的类型`GetFeature`，它从客户端拿到一个`Point`然后将对应的特性返回给数据库中的`Feature`。
 
 ```cpp
   Status GetFeature(ServerContext* context, const Point* point,
@@ -162,10 +164,9 @@ In this case we're implementing the *synchronous* version of `RouteGuide`, which
     return Status::OK;
   }
 ```
+这个方法为RPC传递了一个上下文对象，客户端的`Point` protocol buffer请求以及一个填充响应信息的`Feature` protocol buffer。在这个方法中，我们用适当的信息填充`Feature`，然后返回`OK`的状态，告诉gRPC我们已经处理完RPC，并且`Feature`可以返回给客户端。
 
-The method is passed a context object for the RPC, the client's `Point` protocol buffer request, and a `Feature` protocol buffer to fill in with the response information. In the method we populate the `Feature` with the appropriate information, and then `return` with an `OK` status to tell gRPC that we've finished dealing with the RPC and that the `Feature` can be returned to the client.
-
-Now let's look at something a bit more complicated - a streaming RPC. `ListFeatures` is a server-side streaming RPC, so we need to send back multiple `Feature`s to our client.
+现在让我们看看更加复杂点得情况-流RPC。 `ListFeatures`是一个服务器端的流RPC，因此我们需要给客户端返回多个`Feature`。
 
 ```cpp
   Status ListFeatures(ServerContext* context, const Rectangle* rectangle,
@@ -188,16 +189,16 @@ Now let's look at something a bit more complicated - a streaming RPC. `ListFeatu
   }
 ```
 
-As you can see, instead of getting simple request and response objects in our method parameters, this time we get a request object (the `Rectangle` in which our client wants to find `Feature`s) and a special `ServerWriter` object. In the method, we populate as many `Feature` objects as we need to return, writing them to the `ServerWriter` using its `Write()` method. Finally, as in our simple RPC, we `return Status::OK` to tell gRPC that we've finished writing responses.
+如你所见，这次我们拿到了一个请求对象(客户端期望在`Rectangle`中找到的`Feature`)以及一个特殊的`ServerWriter`对象，而不是在我们的方法参数中获取简单的请求和响应对象。在方法中，根据返回的需要填充足够多的`Feature`对象，用`ServerWriter`的`Write()`方法写入。最后，和我们简单的RPC例子相同，我们返回`Status::OK`去告知gRPC我们已经完成了响应的写入。
 
-If you look at the client-side streaming method `RecordRoute` you'll see it's quite similar, except this time we get a `ServerReader` instead of a request object and a single response. We use the `ServerReader`s `Read()` method to repeatedly read in our client's requests to a request object (in this case a `Point`) until there are no more messages: the server needs to check the return value of `Read()` after each call. If `true`, the stream is still good and it can continue reading; if `false` the message stream has ended.
+如果你看过客户端流方法`RecordRoute`，你会发现它很类似，除了这次我们拿到的是一个`ServerReader`而不是请求对象和单一的响应。我们使用`ServerReader`的`Read()`方法去重复的往请求对象(在这个场景下是一个`Point`)读取客户端的请求直到没有更多的消息：在每次调用后，服务器需要检查`Read()`的返回值。如果返回值为`true`，流仍然存在，它就可以继续读取；如果返回值为`false`，消息流已经停止。
 
 ```cpp
 while (stream->Read(&point)) {
   ...//process client input
 }
 ```
-Finally, let's look at our bidirectional streaming RPC `RouteChat()`.
+最后，让我们看看双向流RPC`RouteChat()`。
 
 ```cpp
   Status RouteChat(ServerContext* context,
@@ -218,11 +219,11 @@ Finally, let's look at our bidirectional streaming RPC `RouteChat()`.
   }
 ```
 
-This time we get a `ServerReaderWriter` that can be used to read *and* write messages. The syntax for reading and writing here is exactly the same as for our client-streaming and server-streaming methods. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
+这次我们得到的`ServerReaderWriter`对象可以用来读 *和* 写消息。这里读写的语法和我们客户端流以及服务器流方法是一样的。虽然每一端获取对方信息的顺序和写入的顺序一致，客户端和服务器都可以以任意顺序读写-流的操作是完全独立的。
 
-### Starting the server
+### 启动服务器
 
-Once we've implemented all our methods, we also need to start up a gRPC server so that clients can actually use our service. The following snippet shows how we do this for our `RouteGuide` service:
+一旦我们实现了所有的方法，我们还需要启动一个gRPC服务器，这样客户端才可以使用服务。下面这段代码展示了在我们`RouteGuide`服务中实现的过程：
 
 ```cpp
 void RunServer(const std::string& db_path) {
@@ -237,31 +238,30 @@ void RunServer(const std::string& db_path) {
   server->Wait();
 }
 ```
-As you can see, we build and start our server using a `ServerBuilder`. To do this, we:
+如你所见，我们通过使用`ServerBuilder`去构建和启动服务器。为了做到这点，我们需要：
 
-1. Create an instance of our service implementation class `RouteGuideImpl`.
-2. Create an instance of the factory `ServerBuilder` class.
-3. Specify the address and port we want to use to listen for client requests using the builder's `AddListeningPort()` method.
-4. Register our service implementation with the builder.
-5. Call `BuildAndStart()` on the builder to create and start an RPC server for our service.
-5. Call `Wait()` on the server to do a blocking wait until process is killed or `Shutdown()` is called.
+1. 创建我们的服务实现类`RouteGuideImpl`的一个实例。
+2. 创建工厂类`ServerBuilder`的一个实例。
+3. 在生成器的`AddListeningPort()`方法中指定客户端请求时监听的地址和端口。
+4. 用生成器注册我们的服务实现。
+5. 调用生成器的`BuildAndStart()`方法为我们的服务创建和启动一个RPC服务器。e.
+5. 调用服务器的`Wait()`方法实现阻塞等待，直到进程被杀死或者`Shutdown()`被调用。
 
 <a name="client"></a>
-## Creating the client
+## 创建客户端
 
-In this section, we'll look at creating a C++ client for our `RouteGuide` service. You can see our complete example client code in [examples/cpp/route_guide/route_guide_client.cc](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/route_guide_client.cc).
+在这部分，我们将尝试为`RouteGuide`服务创建一个C++的客户端。你可以从[examples/cpp/route_guide/route_guide_client.cc](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/route_guide_client.cc)看到我们完整的客户端例子代码.
 
 ### 创建一个桩
 
-To call service methods, we first need to create a *stub*.
+为了能调用服务的方法，我们得先创建一个 *桩*。
 
-First we need to create a gRPC *channel* for our stub, specifying the server address and port we want to connect to and any special channel arguments - in our case we'll use the default `ChannelArguments` and no SSL:
+首先需要为我们的桩创建一个gRPC *channel*，指定我们想连接的服务器地址和端口，以及channel相关的参数-在本例中我们使用了缺省的`ChannelArguments`并且没有使用SSL：
 
 ```cpp
 grpc::CreateChannel("localhost:50051", grpc::InsecureCredentials(), ChannelArguments());
 ```
-
-Now we can use the channel to create our stub using the `NewStub` method provided in the `RouteGuide` class we generated from our .proto.
+现在我们可以利用channel，使用从.proto中生成的`RouteGuide`类提供的`NewStub`方法去创建桩。
 
 ```cpp
  public:
@@ -274,7 +274,7 @@ Now we can use the channel to create our stub using the `NewStub` method provide
 
 ### 调用服务的方法
 
-Now let's look at how we call our service methods. Note that in this tutorial we're calling the *blocking/synchronous* versions of each method: this means that the RPC call waits for the server to respond, and will either return a response or raise an exception.
+现在我们来看看如何调用服务的方法。注意，在本教程中调用的方法，都是 *阻塞/同步* 的版本：这意味着RPC调用等待服务器响应，要么返回响应，要么引起一个异常。
 
 #### 简单RPC
 

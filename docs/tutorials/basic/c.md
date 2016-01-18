@@ -5,7 +5,7 @@ title: gRPC Basics - C++
 
 <h1 class="page-header">gRPC基础: C++</h1>
 
-<p class="lead">本教程提供了一个基本介绍以告诉 C++ 程序员如何使用gRPC.</p>
+<p class="lead">本教程提供了C++程序员如何使用gRPC的指南.</p>
 
 通过学习教程中例子，你可以学会如何:
 
@@ -23,11 +23,12 @@ title: gRPC Basics - C++
 
 我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
-有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRP 帮你解决了不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行接口更新。
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行接口更新。
 
 ## 例子代码和设置
 
 教程的代码在这里 [grpc/grpc/examples/cpp/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide). 要下载例子，通过运行下面的命令去克隆`grpc`代码库:
+
 ```
 $ git clone https://github.com/grpc/grpc.git
 ```
@@ -51,7 +52,7 @@ service RouteGuide {
 }
 ```
 
-然后再你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
 
 - 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
@@ -139,8 +140,6 @@ $ protoc -I ../../protos --cpp_out=. ../../protos/route_guide.proto
 - 运行一个 gRPC 服务器，监听来自客户端的请求并返回服务的响应。
 
 你可以从[examples/cpp/route_guide/route_guide_server.cc](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/route_guide_server.cc)看到我们的 `RouteGuide` 服务器的实现代码。现在让我们近距离研究它是如何工作的。
-
-}}/examples/cpp/route_guide/route_guide_server.cc). Let's take a closer look at how it works.
 
 ### 实现RouteGuide
 
@@ -244,7 +243,7 @@ void RunServer(const std::string& db_path) {
 2. 创建工厂类 `ServerBuilder` 的一个实例。
 3. 在生成器的 `AddListeningPort()` 方法中指定客户端请求时监听的地址和端口。
 4. 用生成器注册我们的服务实现。
-5. 调用生成器的 `BuildAndStart()` 方法为我们的服务创建和启动一个RPC服务器。e.
+5. 调用生成器的 `BuildAndStart()` 方法为我们的服务创建和启动一个RPC服务器。
 5. 调用服务器的 `Wait()` 方法实现阻塞等待，直到进程被杀死或者 `Shutdown()` 被调用。
 
 <a name="client"></a>

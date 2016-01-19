@@ -3,19 +3,19 @@ layout: docs
 title: gRPC Basics - C++
 ---
 
-<h1 class="page-header">gRPC基础: C++</h1>
+<h1 class="page-header">gRPC基础：C++</h1>
 
 <p class="lead">本教程提供了C++程序员如何使用gRPC的指南.</p>
 
-通过学习教程中例子，你可以学会如何:
+通过学习教程中例子，你可以学会如何：
 
 - 在一个 .proto 文件内定义服务.
 - 用 protocol buffer 编译器生成服务器和客户端代码.
 - 使用 gRPC 的 C++ API 为你的服务实现一个简单的客户端和服务器.
 
-假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版:可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
 
-这算不上是一个在 C++ 中使用 gRPC 的综合指南:以后会有更多的参考文档.
+这算不上是一个在 C++ 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
 <div id="toc"></div>
 
@@ -27,13 +27,13 @@ title: gRPC Basics - C++
 
 ## 例子代码和设置
 
-教程的代码在这里 [grpc/grpc/examples/cpp/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide). 要下载例子，通过运行下面的命令去克隆`grpc`代码库:
+教程的代码在这里 [grpc/grpc/examples/cpp/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide). 要下载例子，通过运行下面的命令去克隆`grpc`代码库：
 
 ```
 $ git clone https://github.com/grpc/grpc.git
 ```
 
-改变当前的目录到`examples/cpp/route_guide`:
+改变当前的目录到`examples/cpp/route_guide`：
 ```
 $ cd examples/cpp/route_guide
 ```
@@ -44,7 +44,7 @@ $ cd examples/cpp/route_guide
 ## 定义服务
 我们的第一步(可以从[概览](/docs/index.html)中得知)是使用 [protocol buffers] (https://developers.google.com/protocol-buffers/docs/overview)去定义 gRPC *service* 和方法 *request* 以及 *response* 的类型。你可以在[`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto)看到完整的 .proto 文件。
 
-要定义一个服务，你必须在你的 .proto 文件中指定 `service`:
+要定义一个服务，你必须在你的 .proto 文件中指定 `service`：
 
 ```
 service RouteGuide {
@@ -105,13 +105,13 @@ message Point {
 
 接下来我们需要从 .proto 的服务定义中生成 gRPC 客户端和服务器端的接口。我们通过 protocol buffer 的编译器 `protoc` 以及一个特殊的 gRPC C++ 插件来完成。
 
-简单起见，我们提供一个 [makefile](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/Makefile) 帮您用合适的插件，输入，输出去运行 `protoc`(如果你想自己去运行，确保你已经安装了 protoc，并且请遵循下面的 gRPC 代码[安装指南](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/INSTALL))来操作:
+简单起见，我们提供一个 [makefile](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/Makefile) 帮您用合适的插件，输入，输出去运行 `protoc`(如果你想自己去运行，确保你已经安装了 protoc，并且请遵循下面的 gRPC 代码[安装指南](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/INSTALL))来操作：
 
 ```
 $ make route_guide.grpc.pb.cc route_guide.pb.cc
 ```
 
-实际上运行的是:
+实际上运行的是：
 
 ```
 $ protoc -I ../../protos --grpc_out=. --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` ../../protos/route_guide.proto
@@ -296,9 +296,9 @@ grpc::CreateChannel("localhost:50051", grpc::InsecureCredentials(), ChannelArgum
 如你所见，我们创建并且填充了一个请求的 protocol buffer 对象（例子中为 `Point`），同时为了服务器填写创建了一个响应 protocol buffer 对象。为了调用我们还创建了一个 `ClientContext` 对象——你可以随意的设置该对象上的配置的值，比如期限，虽然现在我们会使用缺省的设置。注意，你不能在不同的调用间重复使用这个对象。最后，我们在存根上调用这个方法，将其传给上下文，请求以及响应。如果方法的返回是`OK`，那么我们就可以从服务器从我们的响应对象中读取响应信息。
 
 ```cpp
-      std::cout << "Found feature called " << feature->name()  << " at "
+      std:：cout << "Found feature called " << feature->name()  << " at "
                 << feature->location().latitude()/kCoordFactor_ << ", "
-                << feature->location().longitude()/kCoordFactor_ << std::endl;
+                << feature->location().longitude()/kCoordFactor_ << std:：endl;
 ```
 
 #### 流式RPC
@@ -360,7 +360,7 @@ grpc::CreateChannel("localhost:50051", grpc::InsecureCredentials(), ChannelArgum
 
 ## 来试试吧！
 
-构建客户端和服务器:
+构建客户端和服务器：
 
 ```
 $ make

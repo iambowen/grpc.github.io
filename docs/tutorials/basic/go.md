@@ -429,20 +429,16 @@ stream.CloseSend()
 
 The syntax for reading and writing here is very similar to our client-side streaming method, except we use the stream's `CloseSend()` method once we've finished our call. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
 
-## Try it out!
+## 来试试吧！
 
-To compile and run the server, assuming you are in the folder
-`$GOPATH/src/google.golang.org/grpc/examples/route_guide`, simply:
+假设你在`$GOPATH/src/google.golang.org/grpc/examples/route_guide`目录，要编译和运行服务器，只需要运行：
 
 ```sh
 $ go run server/server.go
 ```
 
-Likewise, to run the client:
+同样的，运行客户端:
 
 ```sh
 $ go run client/client.go
 ```
-
-
-

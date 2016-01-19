@@ -275,7 +275,7 @@ Now let's look at something a little more complicated: the client-side streaming
     }
 ```
 
-As you can see, like the previous method types our method gets a `StreamObserver` response observer parameter, but this time it returns a `StreamObserver` for the client to write its `Point`s. 
+As you can see, like the previous method types our method gets a `StreamObserver` response observer parameter, but this time it returns a `StreamObserver` for the client to write its `Point`s.
 
 In the method body we instantiate an anonymous `StreamObserver` to return, in which we:
 
@@ -330,7 +330,7 @@ Once we've implemented all our methods, we also need to start up a gRPC server s
     ...
   }
 ```
-As you can see, we build and start our server using a `NettyServerBuilder`. This is a builder for servers based on the [Netty](http://netty.io/) transport framework. 
+As you can see, we build and start our server using a `NettyServerBuilder`. This is a builder for servers based on the [Netty](http://netty.io/) transport framework.
 
 To do this, we:
 
@@ -370,7 +370,7 @@ Now we can use the channel to create our stubs using the `newStub` and `newBlock
 
 ### Calling service methods
 
-Now let's look at how we call our service methods. 
+Now let's look at how we call our service methods.
 
 #### Simple RPC
 
@@ -513,8 +513,6 @@ Finally, let's look at our bidirectional streaming RPC `RouteChat()`.
 As with our client-side streaming example, we both get and return a `StreamObserver` response observer, except this time we send values via our method's response observer while the server is still writing messages to *their* message stream. The syntax for reading and writing here is exactly the same as for our client-streaming method. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
 
 
-## Try it out!
+## 来试试吧！
 
-Follow the instructions in the example directory [README](https://github.com/grpc/grpc-java/blob/master/examples/README.md) to build and run the client and server.
-
-
+根据example目录下的[README](https://github.com/grpc/grpc-java/blob/master/examples/README.md)的指导去构建和运行客户端及服务器。

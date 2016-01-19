@@ -301,17 +301,16 @@ Calling the bidirectionally-streaming `RouteChat` has (as is the case on the ser
 for received_route_note in stub.RouteChat(sent_routes, timeout_in_seconds):
 ```
 
-## Try it out!
+## 来试试吧！
 
-Run the server, which will listen on port 50051:
+运行服务器，它会监听50051端口：
 
 ```
 $ python route_guide_server.py
 ```
 
-Run the client (in a different terminal):
+在另一个终端运行客户端：
 
 ```
 $ python route_guide_client.py
 ```
-

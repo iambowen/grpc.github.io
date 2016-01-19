@@ -280,21 +280,21 @@ Finally, let's look at our bidirectional streaming RPC `route_chat`. In this cas
 
 Although it's not shown well by this example, each enumerable is independent of the other - both the client and server can read and write in any order — the streams operate completely independently.
 
-## Try it out!
+## 来试试吧！
 
-Build client and server:
+构建客户端和服务器：
 
 ```
 $ # from examples/ruby
 $ gem install bundler && bundle install
 ```
-Run the server, which will listen on port 50051:
+运行服务器，它会监听50051端口：
 
 ```
 $ # from examples/ruby
 $ bundle exec route_guide/route_guide_server.rb ../node/route_guide/route_guide_db.json &
 ```
-Run the client (in a different terminal):
+在另一个终端运行客户端：
 
 ```
 $ # from examples/ruby

@@ -362,19 +362,19 @@ var call = client.routeChat();
 
 The syntax for reading and writing here is exactly the same as for our client-streaming and server-streaming methods. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
 
-## Try it out!
+## 来试试吧！
 
-Build client and server:
+构建客户端和服务器：
 
 ```sh
 $ npm install
 ```
-Run the server, which will listen on port 50051:
+运行服务器，它会监听50051端口：
 
 ```sh
 $ node ./route_guide_server.js
 ```
-Run the client (in a different terminal):
+在另一个终端运行客户端：
 
 ```sh
 $ node ./route_guide_client.js

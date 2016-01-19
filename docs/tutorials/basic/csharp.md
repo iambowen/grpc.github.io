@@ -10,12 +10,12 @@ title: gRPC Basics - C#
 
 通过学习教程中例子，你可以学会如何:
 
-- 在一个 .proto 文件内定义服务.
-- 用 protocol buffer 编译器生成服务器和客户端代码.
-- 使用 gRPC 的 C# API 为你的服务实现一个简单的客户端和服务器.
+- 在一个 .proto 文件内定义服务。
+- 用 protocol buffer 编译器生成服务器和客户端代码。
+- 使用 gRPC 的 C# API 为你的服务实现一个简单的客户端和服务器。
 
 
-假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版:可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版:可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容。
 
 这算不上是一个在 C# 中使用 gRPC 的综合指南：以后会有更多的参考文档。
 
@@ -25,11 +25,11 @@ title: gRPC Basics - C#
 
 我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
-有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行接口更新。
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了不同语言间通信的复杂性以及环境的不同。使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行的接口更新。
 
 ## 例子代码和设置
 
-教程的代码在这里 [grpc/grpc/examples/cpp/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/csharp/route_guide). 要下载例子，通过运行下面的命令去克隆`grpc`代码库:
+教程的代码在这里 [grpc/grpc/examples/cpp/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/csharp/route_guide). 要下载例子，请通过运行下面的命令去克隆`grpc`代码库:
 
 ```
 $ git clone https://github.com/grpc/grpc.git
@@ -159,7 +159,7 @@ public class RouteGuideImpl : RouteGuide.IRouteGuide
 
 #### 简单RPC
 
-`RouteGuideImpl` 实现了所有的服务方法。让我们先来看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 然后将对应的特性返回给数据库中的 `Feature`。
+`RouteGuideImpl` 实现了所有的服务方法。让我们先来看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 然后将对应的从数据库中取得的特征信息置于 `Feature` 内返回给客户端。
 
 ```csharp
 public Task<Feature> GetFeature(Point request, Grpc.Core.ServerCallContext context)
@@ -168,13 +168,11 @@ public Task<Feature> GetFeature(Point request, Grpc.Core.ServerCallContext conte
 }
 ```
 
-如你所见，我们创建并且填充了一个请求的 protocol buffer 对象（例子中为 `Point`），同时为了服务器填写创建了一个响应 protocol buffer 对象。为了调用我们还创建了一个 `ClientContext` 对象——你可以随意的设置该对象上的配置的值，比如期限，虽然现在我们会使用缺省的设置。注意，你不能在不同的调用间重复使用这个对象。最后，我们在存根上调用这个方法，将其传给上下文，请求以及响应。如果方法的返回是`OK`，那么我们就可以从服务器从我们的响应对象中读取响应信息。
-
-为了 RPC，方法被传入一个上下文（alpha 版的时候为空），客户端的 `Point` protocol buffer 请求，返回一个 `Feature` protocol buffer。在方法中，我们用适当的信息创建 `Feature` 然后返回。为了允许异步的实现，方法返回 `Task<Feature>` 而不仅是 `Feature`。你可以随意的同步执行你的计算，并在完成后返回结果，就像我们在例子中做的一样。
+为了 RPC，方法被传入一个上下文（alpha 版的时候为空），指客户端的 `Point` protocol buffer 请求，返回一个 `Feature` protocol buffer。在方法中，我们用适当的信息创建 `Feature` 然后返回。为了允许异步的实现，方法返回 `Task<Feature>` 而不仅是 `Feature`。你可以随意的同步执行你的计算，并在完成后返回结果，就像我们在例子中做的一样。
 
 #### 服务器端流式 RPC
 
-现在让我们来看看稍微复杂点的 —— 一个流 RPC。`ListFeatures` 是一个服务器端的流 RPC，所以我们需要给客户端发回多个 `Feature` protocol buffer。
+现在让我们来看看稍微复杂点的 —— 一个流式 RPC。`ListFeatures` 是一个服务器端的流式 RPC，所以我们需要给客户端发回多个 `Feature` protocol buffer。
 
 ```csharp
 // in RouteGuideImpl
@@ -190,7 +188,7 @@ public async Task ListFeatures(Rectangle request,
 }
 ```
 
-如你所见，这里的请求对象是一个 `Rectangle`，客户端期望从中找到 `Feature`，但是我们需要使用异步方法 `WriteAsync` 写入响应到 `IServerStreamWriter`异步流而不是一个简单的响应。
+如你所见，这里的请求对象是一个 `Rectangle`，客户端期望从中找到 `Feature`，但是我们需要使用异步方法 `WriteAsync` 写入响应到 `IServerStreamWriter` 异步流而不是一个简单的响应。
 
 #### 客户端流 RPC
 
@@ -258,7 +256,7 @@ public async Task RouteChat(Grpc.Core.IAsyncStreamReader<RouteNote> requestStrea
 
 ### 启动服务器
 
-一旦我们实现了所有的方法，我们还需要启动一个gRPC服务器，这样客户端才可以使用服务。下面这段代码展示了在我们`RouteGuide`服务中实现的过程：
+一旦我们实现了所有的方法，我们还需要启动一个gRPC服务器，这样客户端才可以使用服务。下面这段代码展示了在我们 `RouteGuide` 服务中实现的过程：
 
 ```csharp
 var features = RouteGuideUtil.ParseFeatures(RouteGuideUtil.DefaultFeaturesFile);
@@ -276,13 +274,13 @@ Console.ReadKey();
 
 server.ShutdownAsync().Wait();
 ```
-如你所见，我们通过使用`Grpc.Core.Server`去构建和启动服务器。为了做到这点，我们需要：
+如你所见，我们通过使用 `Grpc.Core.Server` 去构建和启动服务器。为了做到这点，我们需要：
 
 1. 创建 `Grpc.Core.Server` 的一个实例。
 2. 创建我们的服务实现类 `RouteGuideImpl` 的一个实例。
-3. 通过在`Services`集合中添加服务的定义（我们从生成的`RouteGuide.BindService`方法中获得服务定义）注册我们的服务实现。
-4. 指定想要接受客户端请求的地址和监听的端口。通过往`Ports`集合中添加`ServerPort`即可完成。
-5. 在服务器实例上调用`Start`为我们的服务启动一个 RPC 服务器。
+3. 通过在 `Services` 集合中添加服务的定义（我们从生成的 `RouteGuide.BindService` 方法中获得服务定义）注册我们的服务实现。
+4. 指定想要接受客户端请求的地址和监听的端口。通过往 `Ports` 集合中添加 `ServerPort` 即可完成。
+5. 在服务器实例上调用 `Start` 为我们的服务启动一个 RPC 服务器。
 
 
 <a name="client"></a>
@@ -317,9 +315,9 @@ channel.ShutdownAsync().Wait();
 Point request = new Point { Latitude = 409146138, Longitude = -746188906 };
 Feature feature = client.GetFeature(request);
 ```
-如你所见，我们创建并且填充了一个请求的 protocol buffer 对象（例子中为 `Point`），在客户端对象上调用期望的方法，并传入请求。如果 RPC 成功结束，则返回响应的 protocol buffer（在例子中是`Feature`）。否则抛出`RpcException`类型的异常，指出问题的状态码。
+如你所见，我们创建并且填充了一个请求的 protocol buffer 对象（例子中为 `Point`），在客户端对象上调用期望的方法，并传入请求。如果 RPC 成功结束，则返回响应的 protocol buffer（在例子中是`Feature`）。否则抛出 `RpcException` 类型的异常，指出问题的状态码。
 
-Alternatively, if you are in an async context, you can call an asynchronous version of the method and use the `await` keyword to await the result:
+或者，如果你在异步的上下文环境中，你可以调用这个方法的异步版本并且使用 `await` 关键字来等待结果:
 
 ```csharp
 Point request = new Point { Latitude = 409146138, Longitude = -746188906 };
@@ -343,7 +341,7 @@ using (var call = client.ListFeatures(request))
 }
 ```
 
-客户端的流方法 `RecordRoute` 的使用很相似，除了我们通过`WriteAsync`使用`RequestStream`属性挨个写入请求，最后使用`CompleteAsync`去通知不再需要发送更多的请求。可以通过`ResponseAsync`获取方法的结果。
+客户端的流方法 `RecordRoute` 的使用和它很相似，除了我们通过 `WriteAsync` 使用 `RequestStream` 属性挨个写入请求，最后使用 `CompleteAsync` 去通知不再需要发送更多的请求。可以通过 `ResponseAsync` 获取方法的结果。
 
 ```csharp
 using (var call = client.RecordRoute())
@@ -358,7 +356,7 @@ using (var call = client.RecordRoute())
 }
 ```
 
-最后，让我们看看双向流式 RPC `RouteChat()`。在这种场景下，我们将请求写入`RequestStream`并且从`ResponseStream`接受到响应。从例子可以看出，流之间是互相独立的。
+最后，让我们看看双向流式 RPC `RouteChat()`。在这种场景下，我们将请求写入 `RequestStream` 并且从 `ResponseStream` 接受到响应。从例子可以看出，流之间是互相独立的。
 
 ```csharp
 using (var call = client.RouteChat())
@@ -385,7 +383,7 @@ using (var call = client.RouteChat())
 
 构建客户端和服务器：
 
-- 用 Visual Studio (或者Linux上的Monodevelop) 打开解决方案 `examples/csharp/route_guide/RouteGuide.sln`并选择 **Build**.
+- 用 Visual Studio (或者Linux上的Monodevelop) 打开解决方案 `examples/csharp/route_guide/RouteGuide.sln`并选择 **Build**。
 
 - 运行服务器，它会监听50052端口：
 

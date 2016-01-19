@@ -326,11 +326,11 @@ Point request = new Point { Latitude = 409146138, Longitude = -746188906 };
 Feature feature = await client.GetFeatureAsync(request);
 ```
 
-#### 流 RPC
+#### 流式 RPC
 
-Now let's look at our streaming methods. If you've already read [Creating the server](#server) some of this may look very familiar - streaming RPCs are implemented in a similar way on both sides. The difference with respect to simple call is that the client methods return an instance of a call object. This provides access to request/response streams and/or the asynchronous result, depending on the streaming type you are using.
+现在来看看我们的流方法。如果你已经读过[创建服务器](#server)，本节的一些内容看上去很熟悉——流式 RPC 是在客户端和服务器两端以一种类似的方式实现的。和简单的调用不同的地方在于客户端方法返回了调用对象的实例。它提供了使用请求/响应流和（或者）异步的结果，取决于你使用的流类型。
 
-Here's where we call the server-side streaming method `ListFeatures`, which has the property `ReponseStream` of type `IAsyncEnumerator<Feature>`
+下面就是我们称作是服务器端的流方法 `ListFeatures`，它有`IAsyncEnumerator<Feature>`类型的属性`ReponseStream`：
 
 ```csharp
 using (var call = client.ListFeatures(request))
@@ -343,8 +343,7 @@ using (var call = client.ListFeatures(request))
 }
 ```
 
-The client-side streaming method `RecordRoute` is similar, except we use the property `RequestStream` to write the requests one by one using `WriteAsync`, and eventually signal that no more requests will be sent using `CompleteAsync`. The method result can be obtained through the property
-`ResponseAsync`.
+客户端的流方法 `RecordRoute` 的使用很相似，除了我们通过`WriteAsync`使用`RequestStream`属性挨个写入请求，最后使用`CompleteAsync`去通知不再需要发送更多的请求。可以通过`ResponseAsync`获取方法的结果。
 
 ```csharp
 using (var call = client.RecordRoute())
@@ -359,7 +358,7 @@ using (var call = client.RecordRoute())
 }
 ```
 
-Finally, let's look at our bidirectional streaming RPC `RouteChat`. In this case, we write the request to `RequestStream` and receive the responses from `ResponseStream`. As you can see from the example, the streams are independent of each other.
+最后，让我们看看双向流式 RPC `RouteChat()`。在这种场景下，我们将请求写入`RequestStream`并且从`ResponseStream`接受到响应。从例子可以看出，流之间是互相独立的。
 
 ```csharp
 using (var call = client.RouteChat())
@@ -382,26 +381,26 @@ using (var call = client.RouteChat())
 }
 ```
 
-## Try it out!
+## 来试试吧！
 
-Build client and server:
+构建客户端和服务器：
 
-- Open the solution `examples/csharp/route_guide/RouteGuide.sln` from Visual Studio (or Monodevelop on Linux) and select **Build**.
+- 用 Visual Studio (或者Linux上的Monodevelop) 打开解决方案 `examples/csharp/route_guide/RouteGuide.sln`并选择 **Build**.
 
-- Run the server, which will listen on port 50052:
+- 运行服务器，它会监听50052端口：
 
   ```
   > cd RouteGuideServer/bin/Debug
   > RouteGuideServer.exe
   ```
 
-- Run the client (in a different terminal):
+- 在另一个终端运行客户端：
 
   ```
   > cd RouteGuideClient/bin/Debug
   > RouteGuideClient.exe
   ```
 
-You can also run the server and client directly from Visual Studio.
+你也可以直接从 Visual Studio 里直接运行服务器和客户端。
 
-On Linux or Mac, use `mono RouteGuideServer.exe` and `mono RouteGuideClient.exe` to run the server and client.
+在Linux 或者 Mac系统中， 使用 `mono RouteGuideServer.exe` 和 `mono RouteGuideClient.exe` 命令去运行服务器和客户端。

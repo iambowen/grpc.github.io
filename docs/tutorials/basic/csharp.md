@@ -3,9 +3,9 @@ layout: docs
 title: gRPC Basics - C#
 ---
 
-<h1 class="page-header">gRPC基础: C#</h1>
+<h1 class="page-header">gRPC 基础： C#</h1>
 
-<p class="lead">本教程提供了C#程序员如何使用gRPC的指南。</p>
+<p class="lead">本教程提供了 C# 程序员如何使用 gRPC 的指南。</p>
 
 
 通过学习教程中例子，你可以学会如何:

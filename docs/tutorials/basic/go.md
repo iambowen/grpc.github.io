@@ -3,48 +3,48 @@ layout: docs
 title: gRPC Basics - Go
 ---
 
-<h1 class="page-header">gRPC Basics: Go</h1>
+<h1 class="page-header">gRPC基础: Go</h1>
 
-<p class="lead">This tutorial provides a basic Go programmer's introduction to working with gRPC.</p>
+<p class="lead">本教程提供了Go程序员如何使用gRPC的指南。</p>
 
-By walking through this example you'll learn how to:
+通过学习教程中例子，你可以学会如何：
 
-- Define a service in a .proto file.
-- Generate server and client code using the protocol buffer compiler.
-- Use the Go gRPC API to write a simple client and server for your service.
+- 在一个 .proto 文件内定义服务.
+- 用 protocol buffer 编译器生成服务器和客户端代码.
+- 使用 gRPC 的 Go API 为你的服务实现一个简单的客户端和服务器.
 
-It assumes that you have read the [Overview](/docs/index.html) and are familiar with [protocol buffers] (https://developers.google.com/protocol-buffers/docs/overview). Note that the example in this tutorial uses the proto3 version of the protocol buffers language, which is currently in alpha release: you can find out more in the [proto3 language guide](https://developers.google.com/protocol-buffers/docs/proto3) and see the [release notes](https://github.com/google/protobuf/releases) for the new version in the protocol buffers Github repository.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
 
-This isn't a comprehensive guide to using gRPC in Go: more reference documentation is coming soon.
+这算不上是一个在 Go 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
 <div id="toc"></div>
 
-## Why use gRPC?
+## 为什么使用 gRPC?
 
-Our example is a simple route mapping application that lets clients get information about features on their route, create a summary of their route, and exchange route information such as traffic updates with the server and other clients.
+我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
-With gRPC we can define our service once in a .proto file and implement clients and servers in any of gRPC's supported languages, which in turn can be run in environments ranging from servers inside Google to your own tablet - all the complexity of communication between different languages and environments is handled for you by gRPC. We also get all the advantages of working with protocol buffers, including efficient serialization, a simple IDL, and easy interface updating.
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行接口更新。
 
-## Example code and setup
+## 例子代码和设置
 
-The example code for our tutorial is in [grpc/grpc-go/examples/route_guide](https://github.com/grpc/grpc-go/tree/master/examples/route_guide). To download the example, clone the `grpc-go` repository by running the following command:
+教程的代码在这里 [grpc/grpc-go/examples/cpp/route_guide](https://github.com/grpc/grpc-go/tree/master/examples/route_guide). 要下载例子，通过运行下面的命令去克隆`grpc-go`代码库：
+
 ```
 $ go get google.golang.org/grpc
 ```
 
-Then change your current directory to `grpc-go/examples/route_guide`:
+然后改变当前的目录到 `grpc-go/examples/route_guide`:
 ```
 $ cd $GOPATH/src/google.golang.org/grpc/examples/route_guide
 ```
 
-You also should have the relevant tools installed to generate the server and client interface code - if you don't already, follow the setup instructions in [the Go quick start guide](/docs/installation/go.html).
+你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，查看下面的设置指南[ Go快速开始指南](/docs/installation/go.html)。
 
+## 定义服务
 
-## Defining the service
+我们的第一步(可以从[概览](/docs/index.html)中得知)是使用 [protocol buffers] (https://developers.google.com/protocol-buffers/docs/overview)去定义 gRPC *service* 和方法 *request* 以及 *response* 的类型。你可以在[`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto)看到完整的 .proto 文件。
 
-Our first step (as you'll know from the [Overview](/docs/index.html)) is to define the gRPC *service* and the method *request* and *response* types using [protocol buffers] (https://developers.google.com/protocol-buffers/docs/overview). You can see the complete .proto file in [`examples/helloworld/proto/route_guide.proto`](https://github.com/grpc/grpc-go/blob/master/examples/helloworld/proto/route_guide.proto).
-
-To define a service, you specify a named `service` in your .proto file:
+要定义一个服务，你必须在你的 .proto 文件中指定 `service`：
 
 ```proto
 service RouteGuide {
@@ -52,16 +52,16 @@ service RouteGuide {
 }
 ```
 
-Then you define `rpc` methods inside your service definition, specifying their request and response types. gRPC lets you define four kinds of service method, all of which are used in the `RouteGuide` service:
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
 
-- A *simple RPC* where the client sends a request to the server using the stub and waits for a response to come back, just like a normal function call.
+- 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
 ```proto
    // Obtains the feature at a given position.
    rpc GetFeature(Point) returns (Feature) {}
 ```
 
-- A *server-side streaming RPC* where the client sends a request to the server and gets a stream to read a sequence of messages back. The client reads from the returned stream until there are no more messages. As you can see in our example, you specify a server-side streaming method by placing the `stream` keyword before the *response* type.
+- 一个 *服务器端流式 RPC* ， 客户端发送请求到服务器，拿到一个流去读取返回的消息序列。 客户端读取返回的流，直到里面没有任何消息。从例子中可以看出，通过在 *响应* 类型前插入 `stream` 关键字，可以指定一个服务器端的流方法。
 
 ```proto
   // Obtains the Features available within the given Rectangle.  Results are
@@ -71,7 +71,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc ListFeatures(Rectangle) returns (stream Feature) {}
 ```
 
-- A *client-side streaming RPC* where the client writes a sequence of messages and sends them to the server, again using a provided stream. Once the client has finished writing the messages, it waits for the server to read them all and return its response. You specify a client-side streaming method by placing the `stream` keyword before the *request* type.
+- 一个 *客户端流式 RPC* ， 客户端写入一个消息序列并将其发送到服务器，同样也是使用流。一旦客户端完成写入消息，它等待服务器完成读取返回它的响应。通过在 *请求* 类型前指定 `stream` 关键字来指定一个客户端的流方法。
 
 ```proto
   // Accepts a stream of Points on a route being traversed, returning a
@@ -79,7 +79,8 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RecordRoute(stream Point) returns (RouteSummary) {}
 ```
 
-- A *bidirectional streaming RPC* where both sides send a sequence of messages using a read-write stream. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved. You specify this type of method by placing the `stream` keyword before both the request and the response.
+- 一个 *双向流式 RPC* 是双方使用读写流去发送一个消息序列。两个流独立操作，因此客户端和服务器可以以任意喜欢的顺序读写：比如， 服务器可以在写入响应前等待接收所有的客户端消息，或者可以交替的读取和写入消息，或者其他读写的组合。 每个流中的消息顺序被预留。你可以通过在请求和响应前加 `stream` 关键字去制定方法的类型。
+
 
 ```proto
   // Accepts a stream of RouteNotes sent while a route is being traversed,
@@ -87,7 +88,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-Our .proto file also contains protocol buffer message type definitions for all the request and response types used in our service methods - for example, here's the `Point` message type:
+我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响应类型-比如，下面的`Point`消息类型：
 
 ```proto
 // Points are represented as latitude-longitude pairs in the E7 representation
@@ -101,46 +102,44 @@ message Point {
 ```
 
 
-## Generating client and server code
+## 生成客户端和服务器端代码
 
-Next we need to generate the gRPC client and server interfaces from our .proto service definition. We do this using the protocol buffer compiler `protoc` with a special gRPC Go plugin.
+接下来我们需要从 .proto 的服务定义中生成 gRPC 客户端和服务器端的接口。我们通过 protocol buffer 的编译器 `protoc` 以及一个特殊的 gRPC Go 插件来完成。
 
-For simplicity, we've provided a [bash script](https://github.com/grpc/grpc-go/blob/master/codegen.sh) that runs `protoc` for you with the appropriate plugin, input, and output (if you want to run this by yourself, make sure you've installed protoc and followed the gRPC-Go [installation instructions](https://github.com/grpc/grpc-go/blob/master/README.md) first):
+简单起见，我们提供一个 [bash 脚本](https://github.com/grpc/grpc-go/blob/master/codegen.sh) 帮你用合适的插件，输入，输出去运行 `protoc`(如果你想自己去运行，确保你已经安装了 protoc，并且请遵循下面的 gRPC-Go [安装指南](https://github.com/grpc/grpc-go/blob/master/README.md))来操作：
 
 ```
 $ codegen.sh route_guide.proto
 ```
 
-which actually runs:
+实际上运行的是：
 
 ```
 $ protoc --go_out=plugins=grpc:. route_guide.proto
 ```
 
-Running this command generates the following file in your current directory:
+运行这个命令可以在当前目录中生成下面的文件：
 - `route_guide.pb.go`
 
-This contains:
-- All the protocol buffer code to populate, serialize, and retrieve our request and response message types
-- An interface type (or *stub*) for clients to call with the methods defined in the `RouteGuide` service.
-- An interface type for servers to implement, also with the methods defined in the `RouteGuide` service.
-
+这些包括：
+- 所有的填充，序列化和获取我们请求和响应消息类型的 protocol buffer 代码
+- 一个为客户端调用定义在`RouteGuide`服务的方法的接口类型（或者 *存根* ）
+- 一个为服务器使用定义在`RouteGuide`服务的方法去实现的接口类型（或者 *存根* ）
 
 <a name="server"></a>
-## Creating the server
+## 创建服务器
 
-First let's look at how we create a `RouteGuide` server. If you're only interested in creating gRPC clients, you can skip this section and go straight to [Creating the client](#client) (though you might find it interesting anyway!).
+首先来看看我们如何创建一个 `RouteGuide` 服务器。如果你只对创建 gRPC 客户端感兴趣，你可以跳过这个部分，直接到[创建客户端](#client) (当然你也可能发现它也很有意思)。
 
-There are two parts to making our `RouteGuide` service do its job:
+让 `RouteGuide` 服务工作有两个部分：
+- 实现我们服务定义的生成的服务接口：做我们的服务的实际的“工作”。
+- 运行一个 gRPC 服务器，监听来自客户端的请求并返回服务的响应。
 
-- Implementing the service interface generated from our service definition: doing the actual "work" of our service.
-- Running a gRPC server to listen for requests from clients and dispatch them to the right service implementation.
+你可以从[grpc-go/examples/route_guide/server/server.go](https://github.com/grpc/grpc-go/tree/master/examples/route_guide/server/server.go)看到我们的 `RouteGuide` 服务器的实现代码。现在让我们近距离研究它是如何工作的。
 
-You can find our example `RouteGuide` server in [grpc-go/examples/route_guide/server/server.go](https://github.com/grpc/grpc-go/tree/master/examples/route_guide/server/server.go). Let's take a closer look at how it works.
+### 实现RouteGuide
 
-### Implementing RouteGuide
-
-As you can see, our server has a `routeGuideServer` struct type that implements the generated `RouteGuideServer` interface:
+我们可以看出，服务器有一个实现了生成的 `RouteGuideServer` 接口的 `routeGuideServer` 结构类型：
 
 ```go
 type routeGuideServer struct {
@@ -169,8 +168,8 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 ...
 ```
 
-#### Simple RPC
-`routeGuideServer` implements all our service methods. Let's look at the simplest type first, `GetFeature`, which just gets a `Point` from the client and returns the corresponding feature information from its database in a `Feature`.
+#### 简单 RPC
+`routeGuideServer` 实现了我们所有的服务方法。首先让我们看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`.
 
 ```go
 func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feature, error) {
@@ -183,11 +182,10 @@ func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb
 	return &pb.Feature{"", point}, nil
 }
 ```
+该方法传入了 RPC 的上下文对象，以及客户端的 `Point` protocol buffer请求。它返回了一个包含响应信息和`error` 的 `Feature` protocol buffer对象。在方法中我们用适当的信息填充 `Feature`，然后将其和一个`nil`错误一起返回，告诉 gRPC 我们完成了对 RPC 的处理，并且 `Feature` 可以返回给客户端。
 
-The method is passed a context object for the RPC and the client's `Point` protocol buffer request. It returns a `Feature` protocol buffer object with the response information and an `error`. In the method we populate the `Feature` with the appropriate information, and then `return` it along with an `nil` error to tell gRPC that we've finished dealing with the RPC and that the `Feature` can be returned to the client.
-
-#### Server-side streaming RPC
-Now let's look at one of our streaming RPCs. `ListFeatures` is a server-side streaming RPC, so we need to send back multiple `Feature`s to our client.
+#### 服务器端流 RPC
+现在让我们来看看我们的一种流 RPC。 `ListFeatures` 是一个服务器端的流 RPC，所以我们需要将多个 `Feature` 发回给客户端。
 
 ```go
 func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide_ListFeaturesServer) error {
@@ -202,12 +200,12 @@ func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide
 }
 ```
 
-As you can see, instead of getting simple request and response objects in our method parameters, this time we get a request object (the `Rectangle` in which our client wants to find `Feature`s) and a special `RouteGuide_ListFeaturesServer` object to write our responses.
+如你所见，这里的请求对象是一个 `Rectangle`，客户端期望从中找到 `Feature`，这次我们得到了一个请求对象和一个特殊的`RouteGuide_ListFeaturesServer`来写入我们的响应，而不是得到方法参数中的简单请求和响应对象。
 
-In the method, we populate as many `Feature` objects as we need to return, writing them to the `RouteGuide_ListFeaturesServer` using its `Send()` method. Finally, as in our simple RPC, we return a `nil` error to tell gRPC that we've finished writing responses. Should any error happen in this call, we return a non-`nil` error; the gRPC layer will translate it into an appropriate RPC status to be sent on the wire.
+在这个方法中，我们填充了尽可能多的 `Feature` 对象去返回，用它们的 `Send()` 方法把它们写入 `RouteGuide_ListFeaturesServer`。最后，在我们的简单 RPC中，我们返回了一个 `nil` 错误告诉 gRPC 响应的写入已经完成。如果在调用过程中发生任何错误，我们会返回一个非`nil`的错误；gRPC 层会将其转化为合适的 RPC 状态通过线路发送。
 
-#### Client-side streaming RPC
-Now let's look at something a little more complicated: the client-side streaming method `RecordRoute`, where we get a stream of `Point`s from the client and return a single `RouteSummary` with information about their trip. As you can see, this time the method doesn't have a request parameter at all. Instead, it gets a `RouteGuide_RecordRouteServer` stream, which the server can use to both read *and* write messages - it can receive client messages using its `Recv()` method and return its single response using its `SendAndClose()` method.
+#### 客户端流 RPC
+现在让我们看看稍微复杂点的东西：客户端流方法`RecordRoute`，我们通过它可以从客户端拿到一个`Point`的流，其中包括它们旅程的信息。如你所见，这次这个方法没有请求参数。相反的，它拿到了一个`RouteGuide_RecordRouteServer`流，服务器可以用它来同时读 *和* 写消息——它可以用自己的`Recv()`方法接收客户端消息并且用`SendAndClose()`方法返回它的单个响应。
 
 ```go
 func (s *routeGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) error {
@@ -244,8 +242,8 @@ func (s *routeGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) e
 
 In the method body we use the `RouteGuide_RecordRouteServer`s `Recv()` method to repeatedly read in our client's requests to a request object (in this case a `Point`) until there are no more messages: the server needs to check the the error returned from `Read()` after each call. If this is `nil`, the stream is still good and it can continue reading; if it's `io.EOF` the message stream has ended and the server can return its `RouteSummary`. If it has any other value, we return the error "as is" so that it'll be translated to an RPC status by the gRPC layer.
 
-#### Bidirectional streaming RPC
-Finally, let's look at our bidirectional streaming RPC `RouteChat()`.
+#### 双向流 RPC
+最后，让我们看看双向流 RPC `RouteChat()`。
 
 ```go
 func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error {
@@ -268,13 +266,13 @@ func (s *routeGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 }
 ```
 
-This time we get a `RouteGuide_RouteChatServer` stream that, as in our client-side streaming example, can be used to read and write messages. However, this time we return values via our method's stream while the client is still writing messages to *their* message stream.
+这次我们得到了一个`RouteGuide_RouteChatServer`流，和我们的客户端流的例子一样，它可以用来读写消息。但是，这次当客户端还在往 *它们* 的消息流中写入消息时，我们通过方法的流返回值。
 
-The syntax for reading and writing here is very similar to our client-streaming method, except the server uses the stream's `Send()` method rather than `SendAndClose()` because it's writing multiple responses. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
+这里读写的语法和客户端流方法相似，除了服务器会使用流的`Send()`方法而不是`SendAndClose()`，因为它需要写多个响应。虽然客户端和服务器端总是会拿到对方写入时顺序的消息，它们可以以任意顺序读写—— 流的操作是完全独立的。
 
-### Starting the server
+### 启动服务器
 
-Once we've implemented all our methods, we also need to start up a gRPC server so that clients can actually use our service. The following snippet shows how we do this for our `RouteGuide` service:
+一旦我们实现了所有的方法，我们还需要启动一个gRPC服务器，这样客户端才可以使用服务。下面这段代码展示了在我们`RouteGuide`服务中实现的过程：
 
 ```go
 flag.Parse()
@@ -287,21 +285,20 @@ pb.RegisterRouteGuideServer(grpcServer, &routeGuideServer{})
 ... // determine whether to use TLS
 grpcServer.Serve(lis)
 ```
-To build and start a server, we:
+为了构建和启动服务器，我们需要：
 
-1. Specify the port we want to use to listen for client requests using `lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))`.
-2. Create an instance of the gRPC server using `grpc.NewServer()`.
-3. Register our service implementation with the gRPC server.
-4. Call `Serve()` on the server with our port details to do a blocking wait until the process is killed or `Stop()` is called.
+1. 使用`lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))`指定我们期望客户端请求的监听端口。
+2. 使用`grpc.NewServer()`创建 gRPC 服务器的一个实例。
+3. 在 gRPC 服务器注册我们的服务实现。
+4. 用服务器`Serve()`方法以及我们的端口信息区实现阻塞等待，直到进程被杀死或者 `Stop()`被调用。
 
-<a name="client"></a>
-## Creating the client
+## 创建客户端
 
-In this section, we'll look at creating a Go client for our `RouteGuide` service. You can see our complete example client code in [grpc-go/examples/route_guide/client/client.go](https://github.com/grpc/grpc-go/tree/master/examples/route_guide/client/client.go).
+在这部分，我们将尝试为`RouteGuide`服务创建一个Go的客户端。你可以从[grpc-go/examples/route_guide/client/client.go](https://github.com/grpc/grpc-go/tree/master/examples/route_guide/client/client.go)看到我们完整的客户端例子代码.
 
-### Creating a stub
+### 创建存根
 
-To call service methods, we first need to create a gRPC *channel* to communicate with the server. We create this by passing the server address and port number to `grpc.Dial()` as follows:
+为了调用服务方法，我们首先创建一个 gRPC *channel* 和服务器交互。我们通过给 `grpc.Dial()` 传入服务器地址和端口号做到这点，如下：
 
 ```go
 conn, err := grpc.Dial(*serverAddr)
@@ -310,22 +307,21 @@ if err != nil {
 }
 defer conn.Close()
 ```
+你可以使用 `DialOptions` 在`grpc.Dial`中设置授权认证（如， TLS，GCE认证，JWT认证），如果服务有这样的要求的话 —— 但是对于`RouteGuide`服务，我们不用这么做。
 
-You can use `DialOptions` to set the auth credentials (e.g., TLS, GCE credentials, JWT credentials) in `grpc.Dial` if the service you request requires that - however, we don't need to do this for our `RouteGuide` service.
-
-Once the gRPC *channel* is setup, we need a client *stub* to perform RPCs. We get this using the `NewRouteGuideClient` method provided in the `pb` package we generated from our .proto.
+一旦 gRPC *channel* 建立起来，我们需要一个客户端 *存根* 去执行 RPC。我们通过 .proto 生成的 `pb`包提供的`NewRouteGuideClient`方法来完成。
 
 ```go
 client := pb.NewRouteGuideClient(conn)
 ```
 
-### Calling service methods
+### 调用服务方法
 
-Now let's look at how we call our service methods. Note that in gRPC-Go, RPCs operate in a blocking/synchronous mode, which means that the RPC call waits for the server to respond, and will either return a response or an error.
+现在让我们看看如何调用服务方法。注意，在 gRPC-Go 中，RPC以阻塞/异步模式操作，这意味着 RPC 调用等待服务器响应，同时要么返回响应，要么返回错误。
 
-#### Simple RPC
+#### 简单 RPC
 
-Calling the simple RPC `GetFeature` is nearly as straightforward as calling a local method.
+调用简单 RPC `GetFeature` 几乎是和调用一个本地方法一样直观。
 
 ```go
 feature, err := client.GetFeature(context.Background(), &pb.Point{409146138, -746188906})
@@ -334,15 +330,15 @@ if err != nil {
 }
 ```
 
-As you can see, we call the method on the stub we got earlier. In our method parameters we create and populate a request protocol buffer object (in our case `Point`). We also pass a `context.Context` object which lets us change our RPC's behaviour if necessary, such as time-out/cancel an RPC in flight. If the call doesn't return an error, then we can read the response information from the server from the first return value.
+如你所见，我们调用了前面创建的存根上的方法。在我们的方法参数中，我们创建并且填充了一个请求的 protocol buffer 对象（例子中为 `Point`）。我们同时传入了一个 `context.Context` ，在有需要时可以让我们改变 RPC 的行为，比如超时/取消一个正在运行的 RPC。 如果调用没有返回错误，那么我们就可以从服务器返回的第一个返回值中读到响应信息。
 
 ```go
 log.Println(feature)
 ```
 
-#### Server-side streaming RPC
+#### 服务器端流 RPC
 
-Here's where we call the server-side streaming method `ListFeatures`, which returns a stream of geographical `Feature`s. If you've already read [Creating the server](#server) some of this may look very familiar - streaming RPCs are implemented in a similar way on both sides.
+`ListFeatures` 就是我们说的服务器端流方法，它会返回地理的`Feature` 流。 如果你已经读过[创建服务器](#server)，本节的一些内容看上去很熟悉——流式 RPC 是在客户端和服务器两端以一种类似的方式实现的。
 
 ```go
 rect := &pb.Rectangle{ ... }  // initialize a pb.Rectangle
@@ -361,14 +357,13 @@ for {
     log.Println(feature)
 }
 ```
+在简单 RPC 的例子中，我们给方法传入一个上下文和请求。然而，我们得到返回的是一个`RouteGuide_ListFeaturesClient`实例，而不是一个响应对象。客户端可以使用 `RouteGuide_ListFeaturesClient` 流去读取服务器的响应。
 
-As in the simple RPC, we pass the method a context and a request. However, instead of getting a response object back, we get back an instance of `RouteGuide_ListFeaturesClient`. The client can use the `RouteGuide_ListFeaturesClient` stream to read the server's responses.
+我们使用 `RouteGuide_ListFeaturesClient` 的 `Recv()` 方法去反复读取服务器的响应到一个响应 protocol buffer 对象（在这个场景下是`Feature`）直到消息读取完毕：每次调用完成时，客户端都要检查从 `Recv()` 返回的错误 `err`。如果返回为`nil`，流依然完好并且可以继续读取；如果返回为 `io.EOF`，则说明消息流已经结束；否则就一定是一个通过 `err` 传过来的 RPC 错误。
 
-We use the `RouteGuide_ListFeaturesClient`'s `Recv()` method to repeatedly read in the server's responses to a response protocol buffer object (in this case a `Feature`) until there are no more messages: the client needs to check the error `err` returned from `Recv()` after each call. If `nil`, the stream is still good and it can continue reading; if it's `io.EOF` then the message stream has ended; otherwise there must be an RPC error, which is passed over through `err`.
+#### 客户端流 RPC
 
-#### Client-side streaming RPC
-
-The client-side streaming method `RecordRoute` is similar to the server-side method, except that we only pass the method a context and get a `RouteGuide_RecordRouteClient` stream back, which we can use to both write *and* read messages.
+客户端流方法 `RecordRoute` 和服务器端方法类似，除了我们需要给方法传入一个上下文而后返回 `RouteGuide_RecordRouteClient` 流，它可以用来读 *和* 写消息。
 
 ```go
 // Create a random number of random points
@@ -395,9 +390,9 @@ if err != nil {
 log.Printf("Route summary: %v", reply)
 ```
 
-The `RouteGuide_RecordRouteClient` has a `Send()` method that we can use to send requests to the server. Once we've finished writing our client's requests to the stream using `Send()`, we need to call `CloseAndRecv()` on the stream to let gRPC know that we've finished writing and are expecting to receive a response. We get our RPC status from the `err` returned from `CloseAndRecv()`. If the status is `nil`, then the first return value from `CloseAndRecv()` will be a valid server response.
+`RouteGuide_RecordRouteClient` 有一个 `Send()` 方法，我们可以用它来给服务器发送请求。一旦我们完成使用 `Send()` 方法将客户端请求写入流，就需要调用流的 `CloseAndRecv()`方法，让 gRPC 知道我们已经完成了写入同时期待返回响应。我们从 `CloseAndRecv()` 返回的 `err` 中获得 RPC 的状态。如果状态为`nil`，那么`CloseAndRecv()`的第一个返回值将会是合法的服务器响应。
 
-#### Bidirectional streaming RPC
+#### 双向流 RPC
 
 Finally, let's look at our bidirectional streaming RPC `RouteChat()`. As in the case of `RecordRoute`, we only pass the method a context object and get back a stream that we can use to both write and read messages. However, this time we return values via our method's stream while the server is still writing messages to *their* message stream.
 

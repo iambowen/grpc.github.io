@@ -130,7 +130,6 @@ $ protoc -I ../../protos --cpp_out=. ../../protos/route_guide.proto
    - 让服务器去实现的两个抽象接口，同时包括定义在 `RouteGuide` 中的方法。
 
 
-<a name="server"></a>
 ## 创建服务器
 
 首先来看看我们如何创建一个 `RouteGuide` 服务器。如果你只对创建 gRPC 客户端感兴趣，你可以跳过这个部分，直接到[创建客户端](#client) (当然你也可能发现它也很有意思)。
@@ -246,7 +245,6 @@ void RunServer(const std::string& db_path) {
 5. 调用生成器的 `BuildAndStart()` 方法为我们的服务创建和启动一个RPC服务器。
 5. 调用服务器的 `Wait()` 方法实现阻塞等待，直到进程被杀死或者 `Shutdown()` 被调用。
 
-<a name="client"></a>
 ## 创建客户端
 
 在这部分，我们将尝试为`RouteGuide`服务创建一个C++的客户端。你可以从[examples/cpp/route_guide/route_guide_client.cc](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/cpp/route_guide/route_guide_client.cc)看到我们完整的客户端例子代码.

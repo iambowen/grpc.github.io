@@ -240,7 +240,7 @@ func (s *routeGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) e
 }
 ```
 
-In the method body we use the `RouteGuide_RecordRouteServer`s `Recv()` method to repeatedly read in our client's requests to a request object (in this case a `Point`) until there are no more messages: the server needs to check the the error returned from `Read()` after each call. If this is `nil`, the stream is still good and it can continue reading; if it's `io.EOF` the message stream has ended and the server can return its `RouteSummary`. If it has any other value, we return the error "as is" so that it'll be translated to an RPC status by the gRPC layer.
+在方法体中，我们使用`RouteGuide_RecordRouteServer`的`Recv()`方法去反复读取客户端的请求到一个请求对象（在这个场景下是`Point`），直到没有更多的消息：服务器需要在每次调用后检查`Read()`返回的错误。如果返回值为`nil`，流依然完好，可以继续读取；如果返回值为`io.EOF`，消息流结束，服务器可以返回它的`RouteSummary`。如果它还有其它值，我们原样返回错误，gRPC 层会把它转换为 RPC 状态。
 
 #### 双向流 RPC
 最后，让我们看看双向流 RPC `RouteChat()`。

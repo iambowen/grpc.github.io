@@ -391,7 +391,7 @@ log.Printf("Route summary: %v", reply)
 
 `RouteGuide_RecordRouteClient` 有一个 `Send()` 方法，我们可以用它来给服务器发送请求。一旦我们完成使用 `Send()` 方法将客户端请求写入流，就需要调用流的 `CloseAndRecv()`方法，让 gRPC 知道我们已经完成了写入同时期待返回应答。我们从 `CloseAndRecv()` 返回的 `err` 中获得 RPC 的状态。如果状态为`nil`，那么`CloseAndRecv()`的第一个返回值将会是合法的服务器应答。
 
-#### 双向流 RPC
+#### 双向流式 RPC
 
 Finally, let's look at our bidirectional streaming RPC `RouteChat()`. As in the case of `RecordRoute`, we only pass the method a context object and get back a stream that we can use to both write and read messages. However, this time we return values via our method's stream while the server is still writing messages to *their* message stream.
 

@@ -393,7 +393,9 @@ log.Printf("Route summary: %v", reply)
 
 #### 双向流式 RPC
 
-Finally, let's look at our bidirectional streaming RPC `RouteChat()`. As in the case of `RecordRoute`, we only pass the method a context object and get back a stream that we can use to both write and read messages. However, this time we return values via our method's stream while the server is still writing messages to *their* message stream.
+最后，让我们看看双向流式 RPC `RouteChat()`。 和 `RecordRoute` 的场景类似，我们只给函数传
+入一个上下文对象，拿到可以用来读写的流。但是，当服务器依然在往 *他们* 的消息流写入消息时，我们
+通过方法流返回值。
 
 ```go
 stream, err := client.RouteChat(context.Background())
@@ -421,7 +423,8 @@ stream.CloseSend()
 <-waitc
 ```
 
-The syntax for reading and writing here is very similar to our client-side streaming method, except we use the stream's `CloseSend()` method once we've finished our call. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
+这里读写的语法和我们的客户端流方法很像，除了在完成调用时，我们会使用流的 `CloseSend()` 方法。
+虽然每一端获取对方信息的顺序和写入的顺序一致，客户端和服务器都可以以任意顺序读写——流的操作是完全独立的。
 
 ## 来试试吧！
 

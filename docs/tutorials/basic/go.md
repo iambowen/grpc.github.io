@@ -425,7 +425,7 @@ The syntax for reading and writing here is very similar to our client-side strea
 
 ## 来试试吧！
 
-假设你在`$GOPATH/src/google.golang.org/grpc/examples/route_guide`目录，要编译和运行服务器，只需要运行：
+假设你在 `$GOPATH/src/google.golang.org/grpc/examples/route_guide` 目录，要编译和运行服务器，只需要运行：
 
 ```sh
 $ go run server/server.go

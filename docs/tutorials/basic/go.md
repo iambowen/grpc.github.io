@@ -17,7 +17,6 @@ title: gRPC Basics - Go
 
 这算不上是一个在 Go 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
-<div id="toc"></div>
 
 ## 为什么使用 gRPC?
 

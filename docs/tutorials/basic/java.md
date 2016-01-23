@@ -98,8 +98,10 @@ service 方法，在 `RouteGuide` 服务中都有使用：
   // RouteSummary when traversal is completed.
   rpc RecordRoute(stream Point) returns (RouteSummary) {}
 ```
-
-- A *bidirectional streaming RPC* where both sides send a sequence of messages using a read-write stream. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved. You specify this type of method by placing the `stream` keyword before both the request and the response.
+- 一个 *双向流式 RPC* 是双方使用读写流去发送一个消息序列。两个流独立操作，因此客户端和服务器
+可以以任意喜欢的顺序读写：比如， 服务器可以在写入响应前等待接收所有的客户端消息，或者可以交替
+的读取和写入消息，或者其他读写的组合。 每个流中的消息顺序被预留。你可以通过在请求和响应前加
+`stream` 关键字去制定方法的类型。
 
 ```proto
   // Accepts a stream of RouteNotes sent while a route is being traversed,
@@ -107,7 +109,8 @@ service 方法，在 `RouteGuide` 服务中都有使用：
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-Our .proto file also contains protocol buffer message type definitions for all the request and response types used in our service methods - for example, here's the `Point` message type:
+我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响
+应类型——比如，下面的`Point`消息类型：
 
 ```proto
 // Points are represented as latitude-longitude pairs in the E7 representation
@@ -120,59 +123,53 @@ message Point {
 }
 ```
 
+## 生成客户端和服务器端代码
 
-## Generating client and server code
+接下来我们需要从 .proto 的服务定义中生成 gRPC 客户端和服务器端的接口。我们通过 protocol
+buffer 的编译器 `protoc` 以及一个特殊的 gRPC Java 插件来完成。为了生成 gRPC 服务，你必须
+使用[proto3](https://github.com/google/protobuf/releases)编译器（同时支持 proto2 和
+proto3 语法）。
 
-Next we need to generate the gRPC client and server interfaces from our .proto
-service definition. We do this using the protocol buffer compiler `protoc` with
-a special gRPC Java plugin. You need to use the
-[proto3](https://github.com/google/protobuf/releases) compiler (which supports
-both proto2 and proto3 syntax) in order to generate gRPC services.
+这个例子使用的构建系统也是 Java gRPC 本身构建的一部分——为了简单起见，我们推荐使用为这个例子
+提前生成的代码。你可以参考[README](https://github.com/grpc/grpc-java/blob/master/README.md)zh学习如何从你的 .proto 文件中生成代码。
 
-The build system for this example is also part of Java gRPC itself's build —
-for simplicity we recommend using our pre-generated code for the example. You
-can refer to the <a
-href="https://github.com/grpc/grpc-java/blob/master/README.md">README</a> for
-how to generate code from your own .proto files.
+从这里[src/generated/main](https://github.com/grpc/grpc-java/tree/master/examples/src/generated/main)可以看到为了例子预生成的代码。
 
-<p>Pre-generated code for the examples is available in <a
-href="https://github.com/grpc/grpc-java/tree/master/examples/src/generated/main">src/generated/main</a>.
-The following classes are generated from our service definition:
+下面的类都是从我们的服务定义中生成：
 
-- `Feature.java`, `Point.java`, `Rectangle.java`, and others which contain
-  all the protocol buffer code to populate, serialize, and retrieve our request
-  and response message types.
-- `RouteGuideGrpc.java` which contains (along with some other useful code):
-  - an interface for `RouteGuide` servers to implement,
-    `RouteGuideGrpc.RouteGuide`, with all the methods defined in the `RouteGuide`
-    service.
-  - *stub* classes that clients can use to talk to a `RouteGuide` server.
-    The async stub also implements the `RouteGuide` interface.
+- 包含了所有填充，序列化以及获取请求和应答的消息类型的`Feature.java`，`Point.java`，
+`Rectangle.java`以及其它类文件。
+- `RouteGuideGrpc.java` 文件包含（以及其它一些有用的代码）：
+  - `RouteGuide` 服务器要实现的一个接口 `RouteGuideGrpc.RouteGuide`，其中所有的方法都定
+  义在`RouteGuide`服务中。
+  - 客户端可以用来和`RouteGuide`服务器交互的 *存根* 类。
+    异步的存根也实现了 `RouteGuide` 接口。
 
+## 创建服务器
 
-<a name="server"></a>
-## Creating the server
+首先来看看我们如何创建一个 `RouteGuide` 服务器。如果你只对创建 gRPC 客户端感兴趣，你可以跳
+过这个部分，直接到[创建客户端](#client) (当然你也可能发现它也很有意思)。
 
-First let's look at how we create a `RouteGuide` server. If you're only interested in creating gRPC clients, you can skip this section and go straight to [Creating the client](#client) (though you might find it interesting anyway!).
+让 `RouteGuide` 服务工作有两个部分：
+- 实现我们服务定义的生成的服务接口：做我们的服务的实际的“工作”。
+- 运行一个 gRPC 服务器，监听来自客户端的请求并返回服务的响应。
 
-There are two parts to making our `RouteGuide` service do its job:
+你可以从[grpc-java/examples/src/main/java/io/grpc/examples/RouteGuideServer.java]
+(https://github.com/grpc/grpc-java/blob/master/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideServer.java)看到我们的 `RouteGuide` 服务器的实现代码。现在让我们近距离研究它是如何工作的。
 
-- Implementing the service interface generated from our service definition: doing the actual "work" of our service.
-- Running a gRPC server to listen for requests from clients and return the service responses.
+### 实现RouteGuide
 
-You can find our example `RouteGuide` server in [grpc-java/examples/src/main/java/io/grpc/examples/RouteGuideServer.java](https://github.com/grpc/grpc-java/blob/master/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideServer.java). Let's take a closer look at how it works.
-
-### Implementing RouteGuide
-
-As you can see, our server has a `RouteGuideService` class that implements the generated `RouteGuideGrpc.Service` interface:
+如你所见，我们的服务器有一个实现了生成的 `RouteGuideGrpc.Service` 接口的
+`RouteGuideService`类：
 
 ```java
 private static class RouteGuideService implements RouteGuideGrpc.RouteGuide {
 ...
 }
 ```
-#### Simple RPC
-`RouteGuideService` implements all our service methods. Let's look at the simplest type first, `GetFeature`, which just gets a `Point` from the client and returns the corresponding feature information from its database in a `Feature`.
+#### 简单 RPC
+`routeGuideServer` 实现了我们所有的服务方法。首先让我们看看最简单的类型 `GetFeature`，它
+从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`.
 
 ```java
     @Override
@@ -196,14 +193,16 @@ private static class RouteGuideService implements RouteGuideGrpc.RouteGuide {
     }
 ```
 
-`getFeature()` takes two parameters:
+`getFeature()` 接收两个参数：
 
-- `Point`: the request
-- `StreamObserver<Feature>`: a response observer, which is a special interface for the server to call with its response.
+- `Point`： 请求
+- `StreamObserver<Feature>`： 一个应答的观察者，实际上是服务器调用它应答的一个特殊接口。
 
-To return our response to the client and complete the call:
+要将应答返回给客户端，并完成调用：
 
-1. We construct and populate a `Feature` response object to return to the client, as specified in our service definition. In this example, we do this in a separate private `checkFeature()` method.
+1. 如在我们的服务定义中指定的那样，我们组织并填充一个 `Feature` 应答对象返回给客户端。在这个
+例子中
+ In this example, we do this in a separate private `checkFeature()` method.
 2. We use the response observer's `onNext()` method to return the `Feature`.
 3. We use the response observer's `onCompleted()` method to specify that we've finished dealing with the RPC.
 

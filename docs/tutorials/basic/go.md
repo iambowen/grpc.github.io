@@ -87,7 +87,8 @@ service RouteGuide {
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响应类型-比如，下面的`Point`消息类型：
+我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响
+应类型——比如，下面的`Point`消息类型：
 
 ```proto
 // Points are represented as latitude-longitude pairs in the E7 representation
@@ -125,10 +126,10 @@ $ protoc --go_out=plugins=grpc:. route_guide.proto
 - 一个为客户端调用定义在`RouteGuide`服务的方法的接口类型（或者 *存根* ）
 - 一个为服务器使用定义在`RouteGuide`服务的方法去实现的接口类型（或者 *存根* ）
 
-<a name="server"></a>
 ## 创建服务器
 
-首先来看看我们如何创建一个 `RouteGuide` 服务器。如果你只对创建 gRPC 客户端感兴趣，你可以跳过这个部分，直接到[创建客户端](#client) (当然你也可能发现它也很有意思)。
+首先来看看我们如何创建一个 `RouteGuide` 服务器。如果你只对创建 gRPC 客户端感兴趣，你可以跳
+过这个部分，直接到[创建客户端](#client) (当然你也可能发现它也很有意思)。
 
 让 `RouteGuide` 服务工作有两个部分：
 - 实现我们服务定义的生成的服务接口：做我们的服务的实际的“工作”。

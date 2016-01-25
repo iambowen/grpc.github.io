@@ -3,7 +3,7 @@ layout: docs
 title: gRPC Basics - Java
 ---
 
-gRPC 基础: Java
+# gRPC 基础: Java
 
 本教程提供了 Java 程序员如何使用 gRPC 的指南。
 
@@ -44,7 +44,7 @@ $ git clone https://github.com/grpc/grpc-java.git
 $ cd grpc-java/examples
 ```
 
-你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，请查看下面的设置指南[ Java快速开始指南](/docs/installation/go.html)。
+你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，请查看下面的设置指南[ Java快速开始指南](/docs/installation/java.html)。
 
 ## 定义服务
 
@@ -201,13 +201,12 @@ private static class RouteGuideService implements RouteGuideGrpc.RouteGuide {
 要将应答返回给客户端，并完成调用：
 
 1. 如在我们的服务定义中指定的那样，我们组织并填充一个 `Feature` 应答对象返回给客户端。在这个
-例子中
- In this example, we do this in a separate private `checkFeature()` method.
-2. We use the response observer's `onNext()` method to return the `Feature`.
-3. We use the response observer's `onCompleted()` method to specify that we've finished dealing with the RPC.
+例子中，我们通过一个单独的私有方法`checkFeature()`来实现。
+2. 我们使用应答观察者的 `onNext()` 方法返回 `Feature`。
+3. 我们使用应答观察者的 `onCompleted()` 方法来指出我们已经完成了和 RPC的交互。
 
-#### Server-side streaming RPC
-Next let's look at one of our streaming RPCs. `ListFeatures` is a server-side streaming RPC, so we need to send back multiple `Feature`s to our client.
+#### 服务器端流式 RPC
+现在让我们来看看我们的一种流式 RPC。 `ListFeatures` 是一个服务器端的流式 RPC，所以我们需要将多个 `Feature` 发回给客户端。
 
 ```java
 private final Collection<Feature> features;
@@ -236,12 +235,12 @@ private final Collection<Feature> features;
     }
 ```
 
-Like the simple RPC, this method gets a request object (the `Rectangle` in which our client wants to find `Feature`s) and a `StreamObserver` response observer.
+和简单 RPC 类似，这个方法拿到了一个请求对象（客户端期望从 `Rectangle` 找到 `Feature`）和一个应答观察者 `StreamObserver`。
 
-This time, we get as many `Feature` objects as we need to return to the client (in this case, we select them from the service's feature collection based on whether they're inside our request `Rectangle`), and write them each in turn to the response observer using its `onNext()` method. Finally, as in our simple RPC, we use the response observer's `onCompleted()` method to tell gRPC that we've finished writing responses.
+这次我们得到了需要返回给客户端的足够多的 `Feature` 对象（在这个场景下，我们根据他们是否在我们的 `Rectangle` 请求中，从服务的特性集合中选择他们），并且使用 `onNext()` 方法轮流往响应观察者写入。最后，和简单 RPC 的例子一样，我们使用响应观察者的 `onCompleted()` 方法去告诉 gRPC 写入应答已完成。
 
-#### Client-side streaming RPC
-Now let's look at something a little more complicated: the client-side streaming method `RecordRoute`, where we get a stream of `Point`s from the client and return a single `RouteSummary` with information about their trip.
+#### 客户端流 RPC
+现在让我们看看稍微复杂点的东西：客户端流方法 `RecordRoute`，我们通过它可以从客户端拿到一个 `Point` 的流，并且返回一个包括它们路径的信息 `RouteSummary`。
 
 ```java
  @Override
@@ -283,16 +282,17 @@ Now let's look at something a little more complicated: the client-side streaming
       };
     }
 ```
+如你所见，这次这个方法没有请求参数。相反的，它拿到了一个 `RouteGuide_RecordRouteServer` 流，服务器可以用它来同时读 *和* 写消息——它可以用自己的 `Recv()` 方法接收客户端消息并且用 `SendAndClose()` 方法返回它的单个响应。
 
-As you can see, like the previous method types our method gets a `StreamObserver` response observer parameter, but this time it returns a `StreamObserver` for the client to write its `Point`s.
+如你所见，我们的方法和前面的方法类型相似，拿到一个 `StreamObserver` 应答观察者参数，但是这次它返回一个 `StreamObserver` 以便客户端写入它的 `Point`。
 
-In the method body we instantiate an anonymous `StreamObserver` to return, in which we:
+在这个方法体重，我们返回了一个匿名 `StreamObserver` 实例，其中我们：
 
-- Override the `onNext()` method to get features and other information each time the client writes a `Point` to the message stream.
-- Override the `onCompleted()` method (called when the *client* has finished writing messages) to populate and build our `RouteSummary`. We then call our method's own response observer's `onNext()` with our `RouteSummary`, and then call its `onCompleted()` method to finish the call from the server side.
+- 覆写了 `onNext()` 方法，每次客户端写入一个 `Point` 到消息流时，拿到特性和其它信息。
+- 覆写了 `onCompleted()` 方法（在 *客户端* 结束写入消息时调用），用来填充和构建我们的 `RouteSummary`。然后我们用 `RouteSummary` 调用方法自己的的响应观察者的 `onNext()`，之后调用它的 `onCompleted()` 方法，结束服务器端的调用。
 
-#### Bidirectional streaming RPC
-Finally, let's look at our bidirectional streaming RPC `RouteChat()`.
+#### 双向流式 RPC
+最后，让我们看看双向流式 RPC `RouteChat()`。
 
 ```java
     @Override
@@ -324,11 +324,11 @@ Finally, let's look at our bidirectional streaming RPC `RouteChat()`.
     }
 ```
 
-As with our client-side streaming example, we both get and return a `StreamObserver` response observer, except this time we return values via our method's response observer while the client is still writing messages to *their* message stream. The syntax for reading and writing here is exactly the same as for our client-streaming and server-streaming methods. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
+和我们的客户端流的例子一样，我们拿到和返回一个 `StreamObserver` 应答观察者，除了这次我们在客户端仍然写入消息到 *它们的* 消息流时通过我们方法的应答观察者返回值。这里读写的语法和客户端流以及服务器流方法一样。虽然每一端都会按照它们写入的顺序拿到另一端的消息，客户端和服务器都可以任意顺序读写——流的操作是互不依赖的。
 
-### Starting the server
+### 启动服务器
 
-Once we've implemented all our methods, we also need to start up a gRPC server so that clients can actually use our service. The following snippet shows how we do this for our `RouteGuide` service:
+一旦我们实现了所有的方法，我们还需要启动一个gRPC服务器，这样客户端才可以使用服务。下面这段代码展示了在我们`RouteGuide`服务中实现的过程：
 
 ```java
   public void start() {
@@ -339,28 +339,27 @@ Once we've implemented all our methods, we also need to start up a gRPC server s
     ...
   }
 ```
-As you can see, we build and start our server using a `NettyServerBuilder`. This is a builder for servers based on the [Netty](http://netty.io/) transport framework.
+如你所见，我们用一个 `NettyServerBuilder` 构建和启动服务器。这个服务器的生成器基于 [Netty](http://netty.io/) 传输框架。
 
-To do this, we:
+为了做到这个，我们需要：
 
-1. Create an instance of our service implementation class `RouteGuideService` and pass it to the generated `RouteGuideGrpc` class's static `bindService()` method to get a service definition.
-3. Specify the address and port we want to use to listen for client requests using the builder's `forPort()` method.
-4. Register our service implementation with the builder by passing the service definition returned from `bindService()` to the builder's `addService()` method.
-5. Call `build()` and `start()` on the builder to create and start an RPC server for our service.
+1. 创建我们服务实现类 `RouteGuideService` 的一个实例并且将其传给生成的 `RouteGuideGrpc` 类的静态方法 `bindService()` 去获得服务定义。
+3. 使用生成器的 `forPort()` 方法指定地址以及期望客户端请求监听的端口。
+4. 通过传入将 `bindService()` 返回的服务定义，用生成器注册我们的服务实现到生成器的 `addService()` 方法。
+5. 调用生成器上的 `build()` 和 `start()` 方法为我们的服务创建和启动一个 RPC 服务器。vice.
 
-<a name="client"></a>
-## Creating the client
+## 创建客户端
 
-In this section, we'll look at creating a Java client for our `RouteGuide` service. You can see our complete example client code in [grpc-java/examples/src/main/java/io/grpc/examples/RouteGuideClient.java](https://github.com/grpc/grpc-java/blob/master/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideClient.java).
+在这部分，我们将尝试为 `RouteGuide` 服务创建一个 Java 的客户端。你可以从[grpc-java/examples/src/main/java/io/grpc/examples/RouteGuideClient.java](https://github.com/grpc/grpc-java/blob/master/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideClient.java)看到我们完整的客户端例子代码.
 
-### Creating a stub
+### 创建存根
 
-To call service methods, we first need to create a *stub*, or rather, two stubs:
+为了调用服务方法，我们需要首先创建一个 *存根*，或者两个存根：
 
-- a *blocking/synchronous* stub: this means that the RPC call waits for the server to respond, and will either return a response or raise an exception.
-- a *non-blocking/asynchronous* stub that makes non-blocking calls to the server, where the response is returned asynchronously. You can make certain types of streaming call only using the asynchronous stub.
+- 一个 *阻塞/同步* 存根：这意味着 RPC 调用等待服务器响应，并且要么返回应答，要么造成异常。
+- 一个 *非阻塞/异步* 存根可以向服务器发起非阻塞调用，应答会异步返回。你可以使用异步存根去发起特定类型的流式调用。
 
-First we need to create a gRPC *channel* for our stub, specifying the server address and port we want to connect to:
+我们首先为存根创建一个 gRPC *channel*，指明服务器地址和我们想连接的端口号：
 
 ```java
  channel = NettyChannelBuilder.forAddress(host, port)
@@ -368,31 +367,33 @@ First we need to create a gRPC *channel* for our stub, specifying the server add
         .build();
 ```
 
-As with our server, we're using the [Netty](http://netty.io/) transport framework, so we use a `NettyChannelBuilder`.
+如你所见，我们用一个 `NettyServerBuilder` 构建和启动服务器。这个服务器的生成器基于 [Netty](http://netty.io/) 传输框架。
 
-Now we can use the channel to create our stubs using the `newStub` and `newBlockingStub` methods provided in the `RouteGuideGrpc` class we generated from our .proto.
+我们使用 [Netty](http://netty.io/) 传输框架，所以我们用一个 `NettyServerBuilder` 启动服务器。
+
+现在我们可以通过从 .proto 中生成的 `RouteGuideGrpc` 类的 `newStub` 和 `newBlockingStub` 方法，使用频道去创建我们的存根。
 
 ```java
     blockingStub = RouteGuideGrpc.newBlockingStub(channel);
     asyncStub = RouteGuideGrpc.newStub(channel);
 ```
 
-### Calling service methods
+### 调用服务方法
 
-Now let's look at how we call our service methods.
+现在让我们看看如何调用服务方法。
 
-#### Simple RPC
+#### 简单 RPC
 
-Calling the simple RPC `GetFeature` on the blocking stub is as straightforward as calling a local method.
+在阻塞存根上调用简单 RPC `GetFeature` 几乎是和调用一个本地方法一样直观。
 
 ```java
       Point request = Point.newBuilder().setLatitude(lat).setLongitude(lon).build();
       Feature feature = blockingStub.getFeature(request);
 ```
 
-We create and populate a request protocol buffer object (in our case `Point`), pass it to the `getFeature()` method on our blocking stub, and get back a `Feature`.
+我们创建和填充了一个请求 protocol buffer 对象（在这个场景下是 `Point`），在我们的阻塞存根上将其传给 `getFeature()` 方法，拿回一个 `Feature`。
 
-#### Server-side streaming RPC
+#### 服务器端流式 RPC
 
 Next, let's look at a server-side streaming call to `ListFeatures`, which returns a stream of geographical `Feature`s:
 
@@ -404,11 +405,12 @@ Next, let's look at a server-side streaming call to `ListFeatures`, which return
       Iterator<Feature> features = blockingStub.listFeatures(request);
 ```
 
-As you can see, it's very similar to the simple RPC we just looked at, except instead of returning a single `Feature`, the method returns an `Iterator` that the client can use to read all the returned `Feature`s.
+如你所见，这和我们刚看过的简单 RPC 很相似，除了方法返回客户端用来读取所有返回的 `Feature` 的 一个 `Iterator`，而不是单个的 `Feature`。
 
-#### Client-side streaming RPC
+#### 客户端流式 RPC
 
-Now for something a little more complicated: the client-side streaming method `RecordRoute`, where we send a stream of `Point`s to the server and get back a single `RouteSummary`. For this method we need to use the asynchronous stub. If you've already read [Creating the server](#server) some of this may look very familiar - asynchronous streaming RPCs are implemented in a similar way on both sides.
+现在看看稍微复杂点的东西：我们在客户端流方法 `RecordRoute`发送了一个 `Point` 流给服务器并且拿到一个 `RouteSummary`。为了这个方法，我们需要使用异步存根。如果你已经阅读了
+[创建服务器](#server)，一些部分看起来很相近——异步流式 RPC 是在两端通过相似的方式实现的。
 
 ```java
   public void recordRoute(List<Feature> features, int numPoints) throws Exception {
@@ -463,16 +465,16 @@ Now for something a little more complicated: the client-side streaming method `R
   }
 ```
 
-As you can see, to call this method we need to create a `StreamObserver`, which implements a special interface for the server to call with its `RouteSummary` response. In our `StreamObserver` we:
+如你所见，为了调用这个方法我们需要创建一个 `StreamObserver`，它为了服务器用它的 `RouteSummary` 应答实现了一个特殊的接口。在 `StreamObserver` 中，我们：
 
-- Override the `onNext()` method to print out the returned information when the server writes a `RouteSummary` to the message stream.
-- Override the `onCompleted()` method (called when the *server* has completed the call on its side) to set a `SettableFuture` that we can check to see if the server has finished writing.
+- 覆写了 `onNext()` 方法，在服务器把 `RouteSummary` 写入到消息流时，打印出返回的信息。
+- 覆写了 `onCompleted()` 方法（在 *服务器* 完成自己的调用时调用）去设置 `SettableFuture`，这样我们可以检查服务器是不是完成写入。
 
-We then pass the `StreamObserver` to the asynchronous stub's `recordRoute()` method and get back our own `StreamObserver` request observer to write our `Point`s to send to the server.  Once we've finished writing points, we use the request observer's `onCompleted()` method to tell gRPC that we've finished writing on the client side. Once we're done, we check our `SettableFuture` to check that the server has completed on its side.
+之后，我们将 `StreamObserver` 传给异步存根的 `recordRoute()` 方法，拿到我们自己的 `StreamObserver` 请求观察者将 `Point` 发给服务器。一旦完成点的写入，我们使用请求观察者的 `onCompleted()` 方法告诉 gRPC 我们已经完成了客户端的写入。一旦我们完成，我们检查 `SettableFuture` 验证服务器已经完成写入。
 
-#### Bidirectional streaming RPC
+#### 双向流式 RPC
 
-Finally, let's look at our bidirectional streaming RPC `RouteChat()`.
+最后，让我们看看双向流式 RPC `RouteChat()`。
 
 ```java
   public void routeChat() throws Exception {
@@ -519,8 +521,7 @@ Finally, let's look at our bidirectional streaming RPC `RouteChat()`.
   }
 ```
 
-As with our client-side streaming example, we both get and return a `StreamObserver` response observer, except this time we send values via our method's response observer while the server is still writing messages to *their* message stream. The syntax for reading and writing here is exactly the same as for our client-streaming method. Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
-
+和我们的客户端流的例子一样，我们拿到和返回一个 `StreamObserver` 应答观察者，除了这次我们在客户端仍然写入消息到 *它们的* 消息流时通过我们方法的应答观察者返回值。这里读写的语法和客户端流以及服务器流方法一样。虽然每一端都会按照它们写入的顺序拿到另一端的消息，客户端和服务器都可以任意顺序读写——流的操作是互不依赖的。
 
 ## 来试试吧！
 

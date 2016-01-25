@@ -3,9 +3,9 @@ layout: docs
 title: gRPC Basics - Go
 ---
 
-<h1 class="page-header">gRPC 基础: Go</h1>
+# gRPC 基础: Go
 
-<p class="lead">本教程提供了 Go 程序员如何使用 gRPC 的指南。</p>
+本教程提供了 Go 程序员如何使用 gRPC 的指南。
 
 通过学习教程中例子，你可以学会如何：
 

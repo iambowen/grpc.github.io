@@ -3,49 +3,53 @@ layout: docs
 title: gRPC Basics - Node.js
 ---
 
-<h1 class="page-header">gRPC Basics: Node.js</h1>
+# gRPC 基础: Node.js
 
-<p class="lead">This tutorial provides a basic Node.js programmer's introduction to working with gRPC.</p>
+本教程提供了 Node.js 程序员如何使用 gRPC 的指南。
 
-By walking through this example you'll learn how to:
+通过学习教程中例子，你可以学会如何：
 
-- Define a service in a .proto file.
-- Use the Node.js gRPC API to write a simple client and server for your service.
+- 在一个 .proto 文件内定义服务.
+- 用 protocol buffer 编译器生成服务器和客户端代码.
+- 使用 gRPC 的 Node.js API 为你的服务实现一个简单的客户端和服务器.
 
-It assumes that you have read the [Overview](/docs/index.html) and are familiar with [protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). Note that the example in this tutorial uses the [proto3](https://github.com/google/protobuf/releases) version of the protocol buffers language, which is currently in alpha release: you can find out more in the [proto3 language guide](https://developers.google.com/protocol-buffers/docs/proto3) and see the [release notes](https://github.com/google/protobuf/releases) for the new version in the protocol buffers Github repository.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
 
-This isn't a comprehensive guide to using gRPC in Node.js: more reference documentation is coming soon.
+这算不上是一个在 Java 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
-<div id="toc"></div>
 
-## Why use gRPC?
+## 为什么使用 gRPC?
 
-Our example is a simple route mapping application that lets clients get information about features on their route, create a summary of their route, and exchange route information such as traffic updates with the server and other clients.
 
-With gRPC we can define our service once in a .proto file and implement clients and servers in any of gRPC's supported languages, which in turn can be run in environments ranging from servers inside Google to your own tablet - all the complexity of communication between different languages and environments is handled for you by gRPC. We also get all the advantages of working with protocol buffers, including efficient serialization, a simple IDL, and easy interface updating.
+我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互
+路由信息，如服务器和其他客户端的流量更新。
 
-## Example code and setup
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端
+和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了
+不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序
+列号，简单的 IDL 以及容易进行接口更新。
 
-The example code for our tutorial is in [grpc/grpc/examples/node/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/node/route_guide). To download the example, clone the `grpc` repository by running the following command:
+## 例子的代码和设置
+
+教程的代码在这里 [grpc/grpc/examples/node/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/node/route_guide)。 要下载例子，通过运行下面的命令去克隆`grpc`代码库：
 
 ```sh
 $ git clone https://github.com/grpc/grpc.git
 ```
 
-Then change your current directory to `examples/node/route_guide`:
+然后改变当前的目录到 `examples/node/route_guide`：
 
 ```sh
 $ cd examples/node/route_guide
 ```
 
-You also should have the relevant tools installed to generate the server and client interface code - if you don't already, follow the setup instructions in [the Node.js quick start guide](/docs/installation/node.html).
+你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，请查看下面的设置指南[ Node.js 快速开始指南](/docs/installation/node.html)。
 
+## 定义服务
 
-## Defining the service
+我们的第一步(可以从[概览](/docs/index.html)中得知)是使用 [protocol buffers] (https://developers.google.com/protocol-buffers/docs/overview)去定义 gRPC *service* 和方法 *request* 以及 *response* 的类型。你可以在[`grpc-java/examples/src/main/proto/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto)看到完整的 .proto 文件。
 
-Our first step (as you'll know from the [Overview](/docs/index.html)) is to define the gRPC *service* and the method *request* and *response* types using [protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). You can see the complete .proto file in [`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto).
-
-To define a service, you specify a named `service` in your .proto file:
+要定义一个服务，你必须在你的 .proto 文件中指定 `service`：
 
 ```protobuf
 service RouteGuide {
@@ -53,16 +57,16 @@ service RouteGuide {
 }
 ```
 
-Then you define `rpc` methods inside your service definition, specifying their request and response types. gRPC lets you define four kinds of service method, all of which are used in the `RouteGuide` service:
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
 
-- A *simple RPC* where the client sends a request to the server using the stub and waits for a response to come back, just like a normal function call.
+- 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
 ```protobuf
    // Obtains the feature at a given position.
    rpc GetFeature(Point) returns (Feature) {}
 ```
 
-- A *server-side streaming RPC* where the client sends a request to the server and gets a stream to read a sequence of messages back. The client reads from the returned stream until there are no more messages. As you can see in our example, you specify a server-side streaming method by placing the `stream` keyword before the *response* type.
+- 一个 *服务器端流式 RPC* ， 客户端发送请求到服务器，拿到一个流去读取返回的消息序列。 客户端读取返回的流，直到里面没有任何消息。从例子中可以看出，通过在 *响应* 类型前插入 `stream` 关键字，可以指定一个服务器端的流方法。
 
 ```protobuf
   // Obtains the Features available within the given Rectangle.  Results are
@@ -72,7 +76,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc ListFeatures(Rectangle) returns (stream Feature) {}
 ```
 
-- A *client-side streaming RPC* where the client writes a sequence of messages and sends them to the server, again using a provided stream. Once the client has finished writing the messages, it waits for the server to read them all and return its response. You specify a server-side streaming method by placing the `stream` keyword before the *request* type.
+- 一个 *客户端流式 RPC* ， 客户端写入一个消息序列并将其发送到服务器，同样也是使用流。一旦客户端完成写入消息，它等待服务器完成读取返回它的响应。通过在 *请求* 类型前指定 `stream` 关键字来指定一个客户端的流方法。
 
 ```protobuf
   // Accepts a stream of Points on a route being traversed, returning a
@@ -80,7 +84,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RecordRoute(stream Point) returns (RouteSummary) {}
 ```
 
-- A *bidirectional streaming RPC* where both sides send a sequence of messages using a read-write stream. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved. You specify this type of method by placing the `stream` keyword before both the request and the response.
+- 一个 *双向流式 RPC* 是双方使用读写流去发送一个消息序列。两个流独立操作，因此客户端和服务器可以以任意喜欢的顺序读写：比如， 服务器可以在写入响应前等待接收所有的客户端消息，或者可以交替的读取和写入消息，或者其他读写的组合。 每个流中的消息顺序被预留。你可以通过在请求和响应前加 `stream` 关键字去制定方法的类型。
 
 ```protobuf
   // Accepts a stream of RouteNotes sent while a route is being traversed,
@@ -88,7 +92,8 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-Our .proto file also contains protocol buffer message type definitions for all the request and response types used in our service methods - for example, here's the `Point` message type:
+我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响
+应类型——比如，下面的`Point`消息类型：
 
 ```protobuf
 // Points are represented as latitude-longitude pairs in the E7 representation

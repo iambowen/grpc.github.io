@@ -7,17 +7,17 @@ title: gRPC Basics - Objective-C
 
 本教程提供了 Objective-C 程序员如何使用 gRPC 的指南。通过学习教程中例子，你可以学会如何：
 
-- 在一个 .proto 文件内定义服务.
-- 用 protocol buffer 编译器生成客户端代码.
-- 使用 gRPC 的 Objective-C API 为你的服务实现一个简单的客户端.
+- 在一个 .proto 文件内定义服务。
+- 用 protocol buffer 编译器生成客户端代码。
+- 使用 gRPC 的 Objective-C API 为你的服务实现一个简单的客户端。
 
-假设你已经熟悉了[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
+假设你已经熟悉了[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容。
 
-这算不上是一个在 Objective-C 中使用 gRPC 的综合指南：以后会有更多的参考文档.
+这算不上是一个在 Objective-C 中使用 gRPC 的综合指南：以后会有更多的参考文档。
 
 ## 为什么使用 gRPC?
 
-有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行接口更新。
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了不同语言及环境间通信的复杂性。使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行接口更新。
 
 gRPC 和 proto3 特别适合移动客户端：gRPC 基于 HTTP/2 实现，相比 HTTP/1.1 更加节省网络带宽。序列化和解析 proto 的二进制格式效率高于 JSON，节省了 CPU 和 电池消耗。proto3 使用的运行时在 Google 以及被优化了多年，代码量极小。这对于 Objective-C 非常重要，因为语言的动态天性，编译器在优化不使用的代码时受到了限制。
 
@@ -58,8 +58,8 @@ $ popd
 $ pod install
 ```
 
-（这也许需要编译 OpenSSL, 如果电脑上没有 Cocoapods 的缓存，大概需要15分钟能够完成）。
-最后，打开 Cocoapods 生成的 Xcode workspace，运行应用。你可以在 `ViewControllers.m` 中检查调用的代码，可以从 XCode 的日志窗口看到结果。
+（这也许需要编译 OpenSSL， 如果电脑上没有 Cocoapods 的缓存，大概需要15分钟能够完成）。
+最后，打开 Cocoapods 生成的 Xcode workspace，运行应用。你可以在 `ViewControllers.m` 中检查调用的代码，并且从 XCode 的日志窗口看到结果。
 
 下面的部分会指导你一步步的理解 proto 服务如何定义，如何从中生成一个客户端类库，以及如何使用类库创建一个应用。
 
@@ -74,7 +74,7 @@ service RouteGuide {
    ...
 }
 ```
-然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC 允许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
 
 - 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
@@ -203,7 +203,7 @@ point.longitude = -74E7;
 }];
 ```
 
-如你所见，我们创建并且填充了一个请求的 protocol buffer 对象（例子中为 `RTGPoint`）。然后，我们调用了服务对象的方法，传入请求，处理应答（或者任何 RPC 错误）的块。如果 RPC 顺利完成，处理的块和一个 `nil` 错误参数被调用，我们可以从服务器从应答参数中读取应答信息。如果，相反的，发生了 RPC 错误，处理的块和一个 `nil` 错误参数被调用，我们可以从错误参数中读取到问题的细节。
+如你所见，我们创建并且填充了一个请求的 protocol buffer 对象（例子中为 `RTGPoint`）。然后，我们调用了服务对象的方法，传入请求，处理应答（或者任何 RPC 错误）的块。如果 RPC 顺利完成，处理程序块和一个 `nil` 错误参数被调用，我们可以从服务器从应答参数中读取应答信息。如果，相反的，发生了 RPC 错误，处理程序块和一个 `nil` 错误参数被调用，我们可以从错误参数中读取到问题的细节。
 
 ```objective-c
 NSLog(@"Found feature called %@ at %@.", response.name, response.location);
@@ -226,7 +226,7 @@ NSLog(@"Found feature called %@ at %@.", response.name, response.location);
 }];
 ```
 
-注意处理块的签名现在包括了一个 `BOOL done` 的参数。处理块可以被随意调用；只有在最后一次调用后 `done` 参数会被设置为 `YES`。一旦有错误发生，RPC 结束，处理块和参数 `(YES, nil, error)` 一起被调用。
+注意处理程序块的签名现在包括了一个 `BOOL done` 的参数。处理程序块可以被随意调用；只有在最后一次调用后 `done` 参数会被设置为 `YES`。一旦有错误发生，RPC 结束，处理程序块和参数 `(YES, nil, error)` 一起被调用。
 
 请求流方法 `RecordRoute` 期望从客户端发来的 `RTGPoint` 流。这个流以遵循 `GRXWriter` 协议的对象形式被传入方法中。创建流的最简单的办法就是从 `NSArray` 对象中初始化一个：
 
@@ -276,4 +276,4 @@ GRXWriter *locationsWriter = [GRXWriter writerWithContainer:@[point1, point2]];
 }];
 ```
 
-处理块的语义以及这里的 `GRXWriter` 参数和我们的请求流和应答流方法一致。虽然客户端和服务器获取对方信息的顺序和信息被写入的顺序一致，读写流的操作是完全独立的。
+处理程序块的语义以及这里的 `GRXWriter` 参数和我们的请求流和应答流方法一致。虽然客户端和服务器获取对方信息的顺序和信息被写入的顺序一致，读写流的操作是完全独立的。

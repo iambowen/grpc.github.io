@@ -15,7 +15,7 @@ title: gRPC Basics - Node.js
 
 假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
 
-这算不上是一个在 Java 中使用 gRPC 的综合指南：以后会有更多的参考文档.
+这算不上是一个在 Node.js 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
 ## 为什么使用 gRPC?
 

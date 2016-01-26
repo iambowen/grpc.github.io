@@ -35,7 +35,7 @@ title: gRPC Basics - Python
 $ git clone https://github.com/grpc/grpc.git
 ```
 
-改变当前的目录到  `examples/python/route_guide`：
+改变当前的目录到 `examples/python/route_guide`：
 
 ```
 $ cd examples/python/route_guide

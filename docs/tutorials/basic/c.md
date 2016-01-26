@@ -98,7 +98,6 @@ message Point {
 }
 ```
 
-
 ## 生成客户端和服务器端代码
 
 接下来我们需要从 .proto 的服务定义中生成 gRPC 客户端和服务器端的接口。我们通过 protocol buffer 的编译器 `protoc` 以及一个特殊的 gRPC C++ 插件来完成。

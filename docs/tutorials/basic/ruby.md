@@ -3,50 +3,51 @@ layout: docs
 title: gRPC Basics - Ruby
 ---
 
-<h1 class="page-header">gRPC Basics: Ruby</h1>
+# gRPC 基础: Ruby
 
-<p class="lead">This tutorial provides a basic Ruby programmer's introduction to working with gRPC.</p>
+本教程提供了 Python 程序员如何使用 gRPC 的指南。
 
-By walking through this example you'll learn how to:
+通过学习教程中例子，你可以学会如何：
 
-- Define a service in a .proto file.
-- Generate server and client code using the protocol buffer compiler.
-- Use the Ruby gRPC API to write a simple client and server for your service.
+- 在一个 .proto 文件内定义服务.
+- 用 protocol buffer 编译器生成服务器和客户端代码.
+- 使用 gRPC 的 Ruby API 为你的服务实现一个简单的客户端和服务器.
 
-It assumes that you have read the [Overview](/docs/index.html) and are familiar with [protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). Note that the example in this tutorial uses the proto3 version of the protocol buffers language, which is currently in alpha release: you can find out more in the [proto3 language guide](https://developers.google.com/protocol-buffers/docs/proto3) and see the [release notes](https://github.com/google/protobuf/releases) for the new version in the protocol buffers Github repository.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
 
-This isn't a comprehensive guide to using gRPC in Ruby: more reference documentation is coming soon.
+这算不上是一个在 Ruby 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
-<div id="toc"></div>
+## 为什么使用 gRPC?
 
-## Why use gRPC?
+我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
-Our example is a simple route mapping application that lets clients get information about features on their route, create a summary of their route, and exchange route information such as traffic updates with the server and other clients.
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端
+和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了
+不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序
+列号，简单的 IDL 以及容易进行接口更新。
 
-With gRPC we can define our service once in a .proto file and implement clients and servers in any of gRPC's supported languages, which in turn can be run in environments ranging from servers inside Google to your own tablet - all the complexity of communication between different languages and environments is handled for you by gRPC. We also get all the advantages of working with protocol buffers, including efficient serialization, a simple IDL, and easy interface updating.
+## 例子代码和设置
 
-## Example code and setup
+教程的代码在这里 [grpc/grpc/examples/python/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/python/route_guide)。 要下载例子，通过运行下面的命令去克隆`grpc`代码库：
 
-The example code for our tutorial is in [grpc/grpc/examples/ruby/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide). To download the example, clone the `grpc` repository by running the following command:
+教程的代码在这里[grpc/grpc/examples/ruby/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide)。要下载例子，通过运行下面的命令去克隆`grpc`代码库：
 
 ```
 $ git clone https://github.com/grpc/grpc.git
 ```
 
-Then change your current directory to `examples/ruby/route_guide`:
+改变当前的目录到 `examples/ruby/route_guide`:
 
 ```
 $ cd examples/ruby/route_guide
 ```
+你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，查看下面的设置指南[ Ruby快速开始指南](/docs/installation/python.html)。
 
-You also should have the relevant tools installed to generate the server and client interface code - if you don't already, follow the setup instructions in [the Ruby quick start guide](/docs/installation/ruby.html).
+## 定义服务
 
+我们的第一步(可以从[概览](/docs/index.html)中得知)是使用 [protocol buffers] (https://developers.google.com/protocol-buffers/docs/overview)去定义 gRPC *service* 和方法 *request* 以及 *response* 的类型。你可以在[`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto)看到完整的 .proto 文件。
 
-## Defining the service
-
-Our first step (as you'll know from the [Overview](/docs/index.html)) is to define the gRPC *service* and the method *request* and *response* types using [protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). You can see the complete .proto file in [`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto).
-
-To define a service, you specify a named `service` in your .proto file:
+要定义一个服务，你必须在你的 .proto 文件中指定 `service`：
 
 ```protobuf
 service RouteGuide {
@@ -54,15 +55,16 @@ service RouteGuide {
 }
 ```
 
-Then you define `rpc` methods inside your service definition, specifying their request and response types. gRPC lets you define four kinds of service method, all of which are used in the `RouteGuide` service:
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
 
-- A *simple RPC* where the client sends a request to the server using the stub and waits for a response to come back, just like a normal function call.
+- 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
+
 ```protobuf
    // Obtains the feature at a given position.
    rpc GetFeature(Point) returns (Feature) {}
 ```
 
-- A *server-side streaming RPC* where the client sends a request to the server and gets a stream to read a sequence of messages back. The client reads from the returned stream until there are no more messages. As you can see in our example, you specify a server-side streaming method by placing the `stream` keyword before the *response* type.
+- 一个 *服务器端流式 RPC* ， 客户端发送请求到服务器，拿到一个流去读取返回的消息序列。 客户端读取返回的流，直到里面没有任何消息。从例子中可以看出，通过在 *响应* 类型前插入 `stream` 关键字，可以指定一个服务器端的流方法。
 
 ```protobuf
   // Obtains the Features available within the given Rectangle.  Results are
@@ -72,7 +74,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc ListFeatures(Rectangle) returns (stream Feature) {}
 ```
 
-- A *client-side streaming RPC* where the client writes a sequence of messages and sends them to the server, again using a provided stream. Once the client has finished writing the messages, it waits for the server to read them all and return its response. You specify a server-side streaming method by placing the `stream` keyword before the *request* type.
+- 一个 *客户端流式 RPC* ， 客户端写入一个消息序列并将其发送到服务器，同样也是使用流。一旦客户端完成写入消息，它等待服务器完成读取返回它的响应。通过在 *请求* 类型前指定 `stream` 关键字来指定一个客户端的流方法。
 
 ```protobuf
   // Accepts a stream of Points on a route being traversed, returning a
@@ -80,7 +82,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RecordRoute(stream Point) returns (RouteSummary) {}
 ```
 
-- A *bidirectional streaming RPC* where both sides send a sequence of messages using a read-write stream. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved. You specify this type of method by placing the `stream` keyword before both the request and the response.
+- 一个 *双向流式 RPC* 是双方使用读写流去发送一个消息序列。两个流独立操作，因此客户端和服务器可以以任意喜欢的顺序读写：比如， 服务器可以在写入响应前等待接收所有的客户端消息，或者可以交替的读取和写入消息，或者其他读写的组合。 每个流中的消息顺序被预留。你可以通过在请求和响应前加 `stream` 关键字去制定方法的类型。
 
 ```protobuf
   // Accepts a stream of RouteNotes sent while a route is being traversed,
@@ -88,7 +90,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-Our .proto file also contains protocol buffer message type definitions for all the request and response types used in our service methods - for example, here's the `Point` message type:
+我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响应类型-比如，下面的`Point`消息类型：
 
 ```protobuf
 // Points are represented as latitude-longitude pairs in the E7 representation
@@ -102,48 +104,47 @@ message Point {
 ```
 
 
-## Generating client and server code
+## 生成客户端和服务器端代码
 
-Next we need to generate the gRPC client and server interfaces from our .proto service definition. We do this using the protocol buffer compiler `protoc` with a special gRPC Ruby plugin.
+接下来我们需要从 .proto 的服务定义中生成 gRPC 客户端和服务器端的接口。我们通过 protocol buffer 的编译器 `protoc` 以及一个特殊的 gRPC Ruby 插件来完成。
 
-If you want to run this yourself, make sure you've installed protoc and followed the gRPC Ruby plugin [installation instructions](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/INSTALL) first):
+如果你想自己运行，确保你已经安装了 protoc 并且先遵照 gRPC Ruby 插件[installation instructions](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/INSTALL)。
 
-Once that's done, the following command can be used to generate the ruby code.
+一旦这些完成，就可以用下面的命令来生成 ruby 代码。
 
 ```
 $ protoc -I ../../protos --ruby_out=lib --grpc_out=lib --plugin=protoc-gen-grpc=`which grpc_ruby_plugin` ../../protos/route_guide.proto
 ```
 
-Running this command regenerates the following files in the lib directory:
+运行下面的命令可以在 lib 目录下重新生成下面的文件：
 
-- `lib/route_guide.pb` defines a module `Examples::RouteGuide`
-  - This contain all the protocol buffer code to populate, serialize, and retrieve our request and response message types
-- `lib/route_guide_services.pb`, extends `Examples::RouteGuide` with stub and service classes
-   - a class `Service` for use as a base class when defining RouteGuide service implementations
-   - a class `Stub` that can be used to access remote RouteGuide instances
+- `lib/route_guide.pb` 定义了一个模块 `Examples::RouteGuide`
+  - 包含了所有的填充，序列化和获取我们请求和响应消息类型的 protocol buffer 代码
+- `lib/route_guide_services.pb`，继承了 `Examples::RouteGuide` 以及存根和服务类
+   - 在定义 RouteGuide 服务实现时将 `Service` 类作为基类entations
+   - 用来访问远程 RouteGuide的类 `Stub`
+
+## 创建服务器
+
+首先来看看我们如何创建一个 `RouteGuide` 服务器。如果你只对创建 gRPC 客户端感兴趣，你可以跳过这个部分，直接到[创建客户端](#client) (当然你也可能发现它也很有意思)。
+
+让 `RouteGuide` 服务工作有两个部分：
+- 实现我们服务定义的生成的服务接口：做我们的服务的实际的“工作”。
+- 运行一个 gRPC 服务器，监听来自客户端的请求并返回服务的响应。
 
 
-<a name="server"></a>
-## Creating the server
-
-First let's look at how we create a `RouteGuide` server. If you're only interested in creating gRPC clients, you can skip this section and go straight to [Creating the client](#client) (though you might find it interesting anyway!).
-
-There are two parts to making our `RouteGuide` service do its job:
-- Implementing the service interface generated from our service definition: doing the actual "work" of our service.
-- Running a gRPC server to listen for requests from clients and return the service responses.
-
-You can find our example `RouteGuide` server in [examples/ruby/route_guide/route_guide_server.rb](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide/route_guide_server.rb). Let's take a closer look at how it works.
+你可以从[examples/ruby/route_guide/route_guide_server.rb](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide/route_guide_server.rb)看到 `RouteGuide` 服务器的例子。 现在让我们近距离瞧瞧它是如何工作的。
 
 ### Implementing RouteGuide
 
-As you can see, our server has a `ServerImpl` class that extends the generated `RouteGuide::Service`:
+如你所见，我们的服务器有一个继承生成的 `RouteGuide::Service` 的 `ServerImpl` 类：
 
 ```ruby
 # ServerImpl provides an implementation of the RouteGuide service.
 class ServerImpl < RouteGuide::Service
 ```
 
-`ServerImpl` implements all our service methods. Let's look at the simplest type first, `GetFeature`, which just gets a `Point` from the client and returns the corresponding feature information from its database in a `Feature`.
+`ServerImpl` 实现了所有的服务方法。首先让我们看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`.
 
 ```ruby
   def get_feature(point, _call)
@@ -154,9 +155,9 @@ class ServerImpl < RouteGuide::Service
   end
 ```
 
-The method is passed a _call for the RPC, the client's `Point` protocol buffer request, and returns a `Feature` protocol buffer. In the method we create the `Feature` with the appropriate information, and then `return` it.
+方法为 RPC 传入一个 _call，客户端的 `Point` protocol buffer 请求，并且返回一个 `Feature` protocol buffer。在方法中我们用适当的信息创建了 `Feature`，然后 `return`。
 
-Now let's look at something a bit more complicated - a streaming RPC. `ListFeatures` is a server-side streaming RPC, so we need to send back multiple `Feature`s to our client.
+现在看看稍微复杂点的东西 —— 一个流 RPC。`ListFeatures` 是一个服务器端流式 RPC，所以我们需要发回多个 `Feature` 给客户端。
 
 ```ruby
 # in ServerImpl
@@ -166,16 +167,16 @@ Now let's look at something a bit more complicated - a streaming RPC. `ListFeatu
   end
 ```
 
-As you can see, here the request object is a `Rectangle` in which our client wants to find `Feature`s, but instead of returning a simple response we need to return an [Enumerator](http://ruby-doc.org//core-2.2.0/Enumerator.html) that yields the responses. In the method, we use a helper class `RectangleEnum`, to act as an Enumerator implementation.
+如你所见，这里的请求对象是一个 `Rectangle`，客户端期望从中找到 `Feature`，但是我们需要返回一个产生应答的[Enumerator](http://ruby-doc.org//core-2.2.0/Enumerator.html)而不是一个简单应答。在方法中，我们使用帮助类 `RectangleEnum` 作为一个 Enumerator 的实现。
 
-Similarly, the client-side streaming method `record_route` uses an [Enumerable](http://ruby-doc.org//core-2.2.0/Enumerable.html), but here it's obtained from the call object, which we've ignored in the earlier examples.  `call.each_remote_read` yields each message sent by the client in turn.
+类似的，客户端流方法 `record_route` 使用一个[Enumerable](http://ruby-doc.org//core-2.2.0/Enumerable.html)，但是这里是从调用对象获得，我们在先前的例子中略过了这点。`call.each_remote_read` 会一次产生由客户端发送的消息。
 
 ```ruby
   call.each_remote_read do |point|
     ...
   end
 ```
-Finally, let's look at our bidirectional streaming RPC `route_chat`.
+最后，让我们来看看双向流式 RPC `route_chat`。
 
 ```ruby
   def route_chat(notes)
@@ -192,11 +193,11 @@ Finally, let's look at our bidirectional streaming RPC `route_chat`.
   end
 ```
 
-Here the method receives an [Enumerable](http://ruby-doc.org//core-2.2.0/Enumerable.html), but also returns an [Enumerator](http://ruby-doc.org//core-2.2.0/Enumerator.html) that yields the responses.  The implementation demonstrates how to set these up so that the requests and responses can be handled concurrently.  Although each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
+这里方法接收一个[Enumerable](http://ruby-doc.org//core-2.2.0/Enumerable.html)，但是也会返回一个产生应答的[Enumerator](http://ruby-doc.org//core-2.2.0/Enumerator.html)。实现展示了如何设置它们，而后请求和应答才能并行处理。虽然每一端都会按照它们写入的顺序拿到另一端的消息，客户端和服务器都可以任意顺序读写——流的操作是互不依赖的。
 
-### Starting the server
+### 启动服务器
 
-Once we've implemented all our methods, we also need to start up a gRPC server so that clients can actually use our service. The following snippet shows how we do this for our `RouteGuide` service:
+一旦我们实现了所有的方法，我们还需要启动一个gRPC服务器，这样客户端才可以使用服务。下面这段代码展示了在我们`RouteGuide`服务中实现的过程：
 
 ```ruby
   s = GRPC::RpcServer.new
@@ -205,35 +206,34 @@ Once we've implemented all our methods, we also need to start up a gRPC server s
   s.handle(ServerImpl.new(feature_db))
   s.run_till_terminated
 ```
-As you can see, we build and start our server using a `GRPC::RpcServer`. To do this, we:
+如你所见，我们用 `GRPC::RpcServer` 构建和启动服务器。要做到这点，我们：
 
-1. Create an instance of our service implementation class `ServerImpl`.
-2. Specify the address and port we want to use to listen for client requests using the builder's `add_http2_port` method.
-3. Register our service implementation with the `GRPC::RpcServer`.
-4. Call `run` on the`GRPC::RpcServer` to create and start an RPC server for our service.
+1. 用服务的实现类 `ServerImpl` 创建一个实例。
+2. 使用生成器的 `add_http2_port` 方法指定地址以及期望客户端请求监听的端口。
+3. 用 `GRPC::RpcServer` 注册我们的服务实现。
+4. 调用 `GRPC::RpcServer` 的 `run` 去为我们的服务创建和启动 RPC 服务。
 
-<a name="client"></a>
-## Creating the client
+## 创建客户端
 
-In this section, we'll look at creating a Ruby client for our `RouteGuide` service. You can see our complete example client code in [examples/ruby/route_guide/route_guide_client.rb](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide/route_guide_client.rb).
+在这部分，我们将尝试为 `RouteGuide` 服务创建一个 Ruby 的客户端。你可以从[examples/ruby/route_guide/route_guide_client.rb](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide/route_guide_client.rb)看到我们完整的客户端例子代码.
 
-### Creating a stub
+### 创建存根
 
-To call service methods, we first need to create a *stub*.
+为了调用服务方法，我们需要首先创建一个 *存根*：
 
-We use the `Stub` class of the `RouteGuide` module generated from our .proto.
+我们使用从 .proto 生成的模块 `RouteGuide` 的 `Stub` 类。
 
 ```ruby
  stub = RouteGuide::Stub.new('localhost:50051')
 ```
 
-### Calling service methods
+### 调用服务方法
 
-Now let's look at how we call our service methods. Note that the gRPC Ruby only provides  *blocking/synchronous* versions of each method: this means that the RPC call waits for the server to respond, and will either return a response or raise an exception.
+现在让我们看看如何调用服务方法。注意， gRPC Ruby 只提供了 *阻塞/同步* 版本的方法：这意味着 RPC 调用需要等待服务器响应，并且要么返回应答，要么抛出异常。
 
-#### Simple RPC
+#### 简单 RPC
 
-Calling the simple RPC `GetFeature` is nearly as straightforward as calling a local method.
+调用简单 RPC `GetFeature` 几乎和调用一个本地方法一样直接。
 
 ```ruby
 GET_FEATURE_POINTS = [
@@ -248,12 +248,11 @@ GET_FEATURE_POINTS = [
   end
 ```
 
-As you can see, we create and populate a request protocol buffer object (in our case `Point`), and create a response protocol buffer object for the server to fill in.  Finally, we call the method on the stub, passing it the context, request, and response. If the method returns `OK`, then we can read the response information from the server from our response object.
+我们创建和填充了一个请求 protocol buffer 对象（在这个场景下是 `Point`），并且创建了一个应答 protocol buffer 对象让服务器去填充。最后，我们调用存根上的方法，传入上下文，请求以及应答。如果方法返回 `OK`，那么我们就可以从服务器从我们的应答对象中读取应答信息。
 
+#### 流式 RPC
 
-#### Streaming RPCs
-
-Now let's look at our streaming methods. If you've already read [Creating the server](#server) some of this may look very familiar - streaming RPCs are implemented in a similar way on both sides. Here's where we call the server-side streaming method `list_features`, which returns an `Enumerable` of `Features`
+现在让我们看看流方法。如果你已经阅读了[Creating the server](#server)部分，这些可能看上去很相似 —— 流方法在两端的实现很类似。这里我们调用了服务器端的流方法 `list_features`，它会返回 `Features` 的 `Enumerable`。
 
 ```ruby
   resps = stub.list_features(LIST_FEATURES_RECT)
@@ -262,7 +261,7 @@ Now let's look at our streaming methods. If you've already read [Creating the se
   end
 ```
 
-The client-side streaming method `record_route` is similar, except there we pass the server an `Enumerable`.
+客户端流方法 `record_route` 也很类似，除了我们给服务器传入一个 `Enumerable`。
 
 ```ruby
   ...
@@ -271,14 +270,14 @@ The client-side streaming method `record_route` is similar, except there we pass
   ...
 ```
 
-Finally, let's look at our bidirectional streaming RPC `route_chat`. In this case, we pass `Enumerable` to the method and get back an `Enumerable`.
+最后，让我们看看双向流 RPC `route_chat`。在这个场景下，我们传入一个 `Enumerable`，拿到一个 `Enumerable` 返回。
 
 ```ruby
   resps = stub.route_chat(ROUTE_CHAT_NOTES)
   resps.each { |r| p "received #{r.inspect}" }
 ```
 
-Although it's not shown well by this example, each enumerable is independent of the other - both the client and server can read and write in any order — the streams operate completely independently.
+虽然这个例子展现还不够好，每个 enumerable 之间都是互不依赖的 —— 客户端和服务器都可以以任意顺序读写 —— 流的操作是独立的。
 
 ## 来试试吧！
 

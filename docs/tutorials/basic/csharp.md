@@ -54,7 +54,7 @@ service RouteGuide {
 }
 ```
 
-然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，这些都在 `RouteGuide` 服务中使用：
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC 允许你定义4种类型的 service 方法，这些都在 `RouteGuide` 服务中使用：
 
 - 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
@@ -159,7 +159,7 @@ public class RouteGuideImpl : RouteGuide.IRouteGuide
 
 #### 简单RPC
 
-`RouteGuideImpl` 实现了所有的服务方法。让我们先来看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 然后将对应的从数据库中取得的特征信息置于 `Feature` 内返回给客户端。
+`RouteGuideImpl` 实现了所有的服务方法。让我们先来看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 然后返回包含从数据库拿到的feature信息的 `Feature` 。
 
 ```csharp
 public Task<Feature> GetFeature(Point request, Grpc.Core.ServerCallContext context)

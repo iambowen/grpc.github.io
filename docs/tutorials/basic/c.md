@@ -50,7 +50,7 @@ service RouteGuide {
 }
 ```
 
-然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，这些都在 `RouteGuide` 服务中使用：
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC 允许你定义4种类型的 service 方法，这些都在 `RouteGuide` 服务中使用：
 
 - 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
@@ -149,7 +149,7 @@ class RouteGuideImpl final : public RouteGuide::Service {
 
 在这个场景下，我们正在实现 *同步* 版本的`RouteGuide`，它提供了 gRPC 服务器缺省的行为。同时，也有可能去实现一个异步的接口 `RouteGuide::AsyncService`，它允许你进一步定制服务器线程的行为，虽然在本教程中我们并不关注这点。
 
-`RouteGuideImpl` 实现了所有的服务方法。让我们先来看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 然后将对应的特性返回给数据库中的 `Feature`。
+`RouteGuideImpl` 实现了所有的服务方法。让我们先来看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 然后返回包含从数据库拿到的feature信息的 `Feature`。
 
 ```cpp
   Status GetFeature(ServerContext* context, const Point* point,

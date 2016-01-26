@@ -9,13 +9,13 @@ title: gRPC Basics - Node.js
 
 通过学习教程中例子，你可以学会如何：
 
-- 在一个 .proto 文件内定义服务.
-- 用 protocol buffer 编译器生成服务器和客户端代码.
-- 使用 gRPC 的 Node.js API 为你的服务实现一个简单的客户端和服务器.
+- 在一个 .proto 文件内定义服务。
+- 用 protocol buffer 编译器生成服务器和客户端代码。
+- 使用 gRPC 的 Node.js API 为你的服务实现一个简单的客户端和服务器。
 
-假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容。
 
-这算不上是一个在 Node.js 中使用 gRPC 的综合指南：以后会有更多的参考文档.
+这算不上是一个在 Node.js 中使用 gRPC 的综合指南：以后会有更多的参考文档。
 
 ## 为什么使用 gRPC?
 
@@ -23,8 +23,8 @@ title: gRPC Basics - Node.js
 路由信息，如服务器和其他客户端的流量更新。
 
 有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端
-和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了
-不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序
+和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了
+不同语言及环境间通信的复杂性。使用 protocol buffers 还能获得其他好处，包括高效的序
 列号，简单的 IDL 以及容易进行接口更新。
 
 ## 例子的代码和设置
@@ -41,7 +41,7 @@ $ git clone https://github.com/grpc/grpc.git
 $ cd examples/node/route_guide
 ```
 
-你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，请查看下面的设置指南[ Node.js 快速开始指南](/docs/installation/node.html)。
+你还需要安装生成服务器和客户端的接口代码相关工具——如果你还没有安装的话，请查看下面的设置指南[ Node.js 快速开始指南](/docs/installation/node.html)。
 
 ## 定义服务
 
@@ -55,7 +55,7 @@ service RouteGuide {
 }
 ```
 
-然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC 允许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
 
 - 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
@@ -117,7 +117,7 @@ var protoDescriptor = grpc.load(__dirname + '/route_guide.proto');
 var example = protoDescriptor.examples;
 ```
 
-一旦你完成这个，存根构造函数在 `examples` 命名空间（`protoDescriptor.examples.RouteGuide`）中，服务描述符（用来创建服务器）是存根（`protoDescriptor.examples.RouteGuide.service`）的一个属性。
+一旦你完成这个，存根构造函数是在 `examples` 命名空间（`protoDescriptor.examples.RouteGuide`）中而服务描述符（用来创建服务器）是存根（`protoDescriptor.examples.RouteGuide.service`）的一个属性。
 
 ## 创建服务器
 
@@ -138,7 +138,7 @@ var Server = grpc.buildServer([examples.RouteGuide.service]);
 ```
 在这个场景下，我们实现了 *异步* 版本的 `RouteGuide`，它提供了 gRPC 缺省的行为。
 
-`route_guide_server.js` 中的函数实现了所有的服务方法。首先让我们看看最简单的类型 `getFeature`，它从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`.
+`route_guide_server.js` 中的函数实现了所有的服务方法。首先让我们看看最简单的类型 `getFeature`，它从客户端拿到一个 `Point` 对象，然后返回包含从数据库拿到的feature信息的 `Feature`。
 
 ```js
 function checkFeature(point) {
@@ -193,7 +193,7 @@ function listFeatures(call) {
 如你所见，这次我们拿到了一个实现了 `Writable` 接口的 `call` 对象，而不是调用对象和方法参数中的回调函数。
 在方法中，我们根据返回的需要填充足够多的 `Feature` 对象，用它的 `write()` 方法写入到 `call`。最后，我们调用 `call.end()` 表示我们已经完成了所有消息的发送。
 
-如果你看过客户端流方法`RecordRoute`，你会发现它很类似，除了这次 `call` 参数实现了 `Reader` 的接口。 每次有新数据的时候，`call` 的 `'data'` 事件被触发，每次数据读取完成时， `'end'` 事件被触发。和一元的场景一样，我们通过调用回调函数来应答：
+如果你看过客户端流方法 `RecordRoute`，你会发现它很类似，除了这次 `call` 参数实现了 `Reader` 的接口。 每次有新数据的时候，`call` 的 `'data'` 事件被触发，每次数据读取完成时， `'end'` 事件被触发。和一元的场景一样，我们通过调用回调函数来应答：
 
 ```js
 call.on('data', function(point) {
@@ -260,7 +260,7 @@ routeServer.listen();
 
 ## 创建客户端
 
-在这部分，我们将尝试为`RouteGuide`服务创建一个 Node.js 的客户端。你可以从[examples/node/route_guide/route_guide_client.js](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/node/route_guide/route_guide_client.js)看到我们完整的客户端例子代码.
+在这部分，我们将尝试为 `RouteGuide` 服务创建一个 Node.js 的客户端。你可以从[examples/node/route_guide/route_guide_client.js](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/node/route_guide/route_guide_client.js)看到我们完整的客户端例子代码。
 
 ### 创建一个存根
 

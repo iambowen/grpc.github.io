@@ -3,52 +3,50 @@ layout: docs
 title: gRPC Basics - PHP
 ---
 
-<h1 class="page-header">gRPC Basics: PHP</h1>
+# gRPC 基础: PHP
+本教程提供了 PHP 程序员如何使用 gRPC 的指南。
 
-This tutorial provides a basic PHP programmer's introduction to working with gRPC. By walking through this example you'll learn how to:
+通过学习教程中例子，你可以学会如何：
 
-- Define a service in a .proto file.
-- Generate client code using the protocol buffer compiler.
-- Use the PHP gRPC API to write a simple client for your service.
+- 在一个 .proto 文件内定义服务.
+- 用 protocol buffer 编译器生成服务器和客户端代码.
+- 使用 gRPC 的 PHP API 为你的服务实现一个简单的客户端和服务器.
 
-It assumes a passing familiarity with [protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). Note that the example in this tutorial uses the proto2 version of the protocol buffers language.
+假设你已经熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto2 版本。
 
-Also note that currently you can only create clients in PHP for gRPC services - you can find out how to create gRPC servers in our other tutorials, e.g. [Node.js](/docs/tutorials/basic/node.html).
+同时注意目前你只能用 PHP 创建 gRPC 服务的客户端——你可以从我们的其他教程中，如[Node.js](/docs/tutorials/basic/node.html)，找到如何创建 gRPC 服务器的例子。
 
-This isn't a comprehensive guide to using gRPC in PHP: more reference documentation is coming soon.
+这算不上是一个在 PHP 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
-<div id="toc"></div>
+## 为什么使用 gRPC?
 
-<a name="why-grpc"></a>
-## Why use gRPC?
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端
+和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了
+不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序
+列号，简单的 IDL 以及容易进行接口更新。
 
-With gRPC you can define your service once in a .proto file and implement clients and servers in any of gRPC's supported languages, which in turn can be run in environments ranging from servers inside Google to your own tablet - all the complexity of communication between different languages and environments is handled for you by gRPC. You also get all the advantages of working with protocol buffers, including efficient serialization, a simple IDL, and easy interface updating.
+## 例子的代码和设置
 
-
-<a name="setup"></a>
-## Example code and setup
-
-The example code for our tutorial is in [grpc/grpc/examples/php/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/php/route_guide). To download the example, clone the `grpc` repository by running the following command:
+教程的代码在这里 [grpc/grpc/examples/php/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/php/route_guide)。 要下载例子，通过运行下面的命令去克隆`grpc`代码库：
 
 ```
 $ git clone https://github.com/grpc/grpc.git
 ```
 
-Then change your current directory to `examples/php/route_guide`:
+然后改变当前的目录到 `examples/php/route_guide`:
 
 ```
 $ cd examples/php/route_guide
 ```
 
-Our example is a simple route mapping application that lets clients get information about features on their route, create a summary of their route, and exchange route information such as traffic updates with the server and other clients.
+我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互
+路由信息，如服务器和其他客户端的流量更新。
 
-You also should have the relevant tools installed to generate the client interface code (and a server in another language, for testing). You can obtain the latter by following [these setup instructions](https://github.com/grpc/homebrew-grpc).
+你还需要安装生成客户端的接口代码的相关工具（以及一个用其他语言实现的服务器，出于测试的目的）-如果你还没有安装的话，请查看下面的设置指南[这些设置指南](https://github.com/grpc/homebrew-grpc)。
 
+## 来试试吧！
 
-<a name="try"></a>
-## Try it out!
-
-To try the sample app, we need a gRPC server running locally. Let's compile and run, for example, the Node.js server in this repository:
+为了使用例子应用，我们需要本地运行一个 gRPC 的服务器。让我们来编译运行，比如这个代码库中的 Node.js 服务器：
 
 ```
 $ cd ../../node
@@ -57,38 +55,35 @@ $ cd route_guide
 $ nodejs ./route_guide_server.js --db_path=route_guide_db.json
 ```
 
-Run the PHP client (in a different terminal):
+在一个不同的命令窗口运行 PHP 客户端：
 
 ```
 $ ./run_route_guide_client.sh
 ```
 
-The next sections guide you step-by-step through how this proto service is defined, how to generate a client library from it, and how to create a client stub that uses that library.
+下面的部分会指导你一步步的理解 proto 服务如何定义，如何从中生成一个客户端类库，以及如何使用类库创建一个应用。
 
+## 定义服务
 
-<a name="proto"></a>
-## Defining the service
+首先来看看我们使用的服务是如何定义的。gRPC 的 *service* 和它的方法 *request* 以及 *response* 类型使用了[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。你可以在[`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto)看到完整的 .proto 文件。
 
-First let's look at how the service we're using is defined. A gRPC *service* and its method *request* and *response* types using [protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). You can see the complete .proto file for our example in [`examples/protos/route_guide.proto`](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/protos/route_guide.proto).
-
-To define a service, you specify a named `service` in your .proto file:
+要定义一个服务，你必须在你的 .proto 文件中指定 `service`：
 
 ```protobuf
 service RouteGuide {
    ...
 }
 ```
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
 
-Then you define `rpc` methods inside your service definition, specifying their request and response types. Protocol buffers let you define four kinds of service method, all of which are used in the `RouteGuide` service:
-
-- A *simple RPC* where the client sends a request to the server and receives a response later, just like a normal remote procedure call.
+- 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的远程过程调用调用一样。
 
 ```protobuf
    // Obtains the feature at a given position.
    rpc GetFeature(Point) returns (Feature) {}
 ```
 
-- A *response-streaming RPC* where the client sends a request to the server and gets back a stream of response messages. You specify a response-streaming method by placing the `stream` keyword before the *response* type.
+- 一个 *应答流式 RPC* ， 客户端发送请求到服务器，拿到返回的应答消息流。通过在 *响应* 类型前插入 `stream` 关键字，可以指定一个服务器端的流方法。
 
 ```protobuf
   // Obtains the Features available within the given Rectangle.  Results are
@@ -98,7 +93,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc ListFeatures(Rectangle) returns (stream Feature) {}
 ```
 
-- A *request-streaming RPC* where the client sends a sequence of messages to the server. Once the client has finished writing the messages, it waits for the server to read them all and return its response. You specify a request-streaming method by placing the `stream` keyword before the *request* type.
+- 一个 *请求流式 RPC* ， 客户端发送一个消息序列到服务器。一旦客户端完成写入消息，它等待服务器完成读取返回它的响应。通过在 *请求* 类型前指定 `stream` 关键字来指定一个客户端的流方法。
 
 ```protobuf
   // Accepts a stream of Points on a route being traversed, returning a
@@ -106,7 +101,7 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RecordRoute(stream Point) returns (RouteSummary) {}
 ```
 
-- A *bidirectional streaming RPC* where both sides send a sequence of messages to the other. The two streams operate independently, so clients and servers can read and write in whatever order they like: for example, the server could wait to receive all the client messages before writing its responses, or it could alternately read a message then write a message, or some other combination of reads and writes. The order of messages in each stream is preserved. You specify this type of method by placing the `stream` keyword before both the request and the response.
+- 一个 *双向流式 RPC* 是双方使用读写流去发送一个消息序列。两个流独立操作，因此客户端和服务器可以以任意喜欢的顺序读写：比如， 服务器可以在写入响应前等待接收所有的客户端消息，或者可以交替的读取和写入消息，或者其他读写的组合。 每个流中的消息顺序被预留。你可以通过在请求和响应前加 `stream` 关键字去制定方法的类型。
 
 ```protobuf
   // Accepts a stream of RouteNotes sent while a route is being traversed,
@@ -114,7 +109,8 @@ Then you define `rpc` methods inside your service definition, specifying their r
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-Our .proto file also contains protocol buffer message type definitions for all the request and response types used in our service methods - for example, here's the `Point` message type:
+我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响
+应类型——比如，下面的`Point`消息类型：
 
 ```protobuf
 // Points are represented as latitude-longitude pairs in the E7 representation
@@ -127,11 +123,11 @@ message Point {
 }
 ```
 
+## 生成客户端代码
 
-<a name="protoc"></a>
-## Generating client code
+接下来我们需要从 .proto 的服务定义中生成 gRPC 客户端接口。我们通过 protocol buffer 的编译器 `protoc` 以及一个特殊的 gRPC Objective-C 插件来完成。
 
-The PHP client stub implementation of the proto files can be generated by the [`protoc-gen-php`](https://github.com/datto/protobuf-php) tool. To install the tool:
+可以用[`protoc-gen-php`](https://github.com/datto/protobuf-php)工具从 proto 文件中生成 PHP 客户端存根实现。安装这个工具，运行：
 
 ```sh
 $ cd examples/php
@@ -142,47 +138,43 @@ $ rake pear:package version=1.0
 $ sudo pear install Protobuf-1.0.tgz
 ```
 
-To generate the client stub implementation .php file:
+从 .php 文件 中生成客户端存根实现：
 
 ```sh
 $ cd php/route_guide
 $ protoc-gen-php -i . -o . ./route_guide.proto
 ```
+`php/route_guide` 目录下会生成一个 `route_guide.php` 文件。你不需要修改这个文件。
 
-A `route_guide.php` file will be generated in the `php/route_guide` directory. You do not need to modify the file.
-
-To load the generated client stub file, simply `require` it in your PHP application:
+要加载生成的客户端存根文件，只需要在你的 PHP 应用中 `require` 它：
 
 ```php
 require dirname(__FILE__) . '/route_guide.php';
 ```
 
-The file contains:
+文件包括：
+- 所有用于填充，序列化和获取我们请求和响应消息类型的 protocol buffer 代码
+- 一个名为 `examples\RouteGuideClient` 的类，可以让客户端调用定义在 `RouteGuide` 服务中的方法。
 
-- All the protocol buffer code to populate, serialize, and retrieve our request and response message types.
-- A class called `examples\RouteGuideClient` that lets clients call the methods defined in the `RouteGuide` service.
+## 创建客户端
 
+在这个部分，我们会使用 `RouteGuide` 服务去创建一个 PHP 客户端。在[examples/php/route_guide/route_guide_client.php](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/php/route_guide/route_guide_client.php)可以看到我们完整的客户端例子代码。
 
-<a name="client"></a>
-## Creating the client
+### 构造一个客户端对象
 
-In this section, we'll look at creating a PHP client for our `RouteGuide` service. You can see our complete example client code in [examples/php/route_guide/route_guide_client.php](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/php/route_guide/route_guide_client.php).
-
-### Constructing a client object
-
-To call service methods, we first need to create a client object, an instance of the generated `RouteGuideClient` class. The constructor of the class expects the server address and port we want to connect to:
+要调用一个服务方法，我们首先需要创建一个客户端对象，生成的 `RouteGuideClient` 类的一个实例。该类的构造函数接受一个服务器地址以及我们想连接端口：
 
 ```php
 $client = new examples\RouteGuideClient('localhost:50051', []);
 ```
 
-### Calling service methods
+### 调用服务方法
 
-Now let's look at how we call our service methods.
+现在让我们来看看如何调用服务方法。
 
-#### Simple RPC
+#### 简单 RPC
 
-Calling the simple RPC `GetFeature` is nearly as straightforward as calling a local asynchronous method.
+调用简单 RPC `GetFeature` 几乎是和调用本地的异步方法一样直观。
 
 ```php
   $point = new examples\Point();
@@ -191,7 +183,7 @@ Calling the simple RPC `GetFeature` is nearly as straightforward as calling a lo
   list($feature, $status) = $client->GetFeature($point)->wait();
 ```
 
-As you can see, we create and populate a request object, i.e. an `examples\Point` object. Then, we call the method on the stub, passing it the request object. If there is no error, then we can read the response information from the server from our response object, i.e. an `examples\Feature` object.
+如你所见，我们创建并且填充了一个请求对象，如一个 `examples\Point`。然后，我们调用了存根上的方法，传入请求对象。如果没有错误，那么我们就可以从服务器从应答对象，如一个 `examples\Feature`，中读取应答信息。
 
 ```php
   print sprintf("Found %s \n  at %f, %f\n", $feature->getName(),
@@ -199,9 +191,9 @@ As you can see, we create and populate a request object, i.e. an `examples\Point
                 $feature->getLocation()->getLongitude() / COORD_FACTOR);
 ```
 
-#### Streaming RPCs
+#### 流式 RPC
 
-Now let's look at our streaming methods. Here's where we call the server-side streaming method `ListFeatures`, which returns a stream of geographical `Feature`s:
+现在让我们看看流式方法。下面我们调用了服务器端流方法 `ListFeatures`，它会返回一个地理的 `Feature` 流：
 
 ```php
   $lo_point = new examples\Point();
@@ -224,9 +216,9 @@ Now let's look at our streaming methods. Here's where we call the server-side st
   } // the loop will end when the server indicates there is no more responses to be sent.
 ```
 
-The `$call->responses()` method call returns an iterator. When the server sends a response, a `$feature` object will be returned in the `foreach` loop, until the server indiciates that there will be no more responses to be sent.
+`$call->responses()` 方法调用返回一个迭代器。当服务器发送应答时，`foreach` 循环中会返回一个 `$feature` 对象，知道服务器表示没有更多的应答发送。
 
-The client-side streaming method `RecordRoute` is similar, except that we call `$call->write($point)` for each point we want to write from the client side and get back a `examples\RouteSummary`.
+客户端流方法 `RecordRoute` 的使用很类似，除了我们为每个从客户端写入的每个点调用 `$call->write($point)` ，并拿到一个 `examples\RouteSummary` 返回。
 
 ```php
   $call = $client->RecordRoute();
@@ -241,13 +233,13 @@ The client-side streaming method `RecordRoute` is similar, except that we call `
   list($route_summary, $status) = $call->wait();
 ```
 
-Finally, let's look at our bidirectional streaming RPC `routeChat()`. In this case, we just pass a context to the method and get back a `BidiStreamingCall` stream object, which we can use to both write and read messages.
+最后，让我们看看双向流式 RPC `routeChat()`。在这个场景下，我们给方法传入一个上下文，拿到一个 `BidiStreamingCall` 流对象的返回，我们可以用这个流对象读写消息。
 
 ```php
 $call = $client->RouteChat();
 ```
 
-To write messages from the client:
+从客户端写入消息：
 
 ```php
   foreach ($notes as $n) {
@@ -257,12 +249,11 @@ To write messages from the client:
   $call->writesDone();
 ```
 
-To read messages from the server:
+从服务器读取消息：
 
 ```php
   while ($route_note_reply = $call->read()) {
     // process $route_note_reply
   }
 ```
-
-Each side will always get the other's messages in the order they were written, both the client and server can read and write in any order — the streams operate completely independently.
+客户端和服务器获取对方信息的顺序和信息被写入的顺序一致，客户端和服务器都可以以任意顺序读写——流的操作是完全独立的。

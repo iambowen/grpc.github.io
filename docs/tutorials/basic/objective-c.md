@@ -153,8 +153,6 @@ $ protoc -I ../../protos --objc_out=Pods/RouteGuide --objcgrpc_out=Pods/RouteGui
 - `RouteGuide.pbrpc.m`，包含了你的服务类的实现。
 
 这些包括：
-
-这些包括：
 - 所有用于填充，序列化和获取我们请求和响应消息类型的 protocol buffer 代码
 - 一个名为 `RTGRouteGuide` 的类，可以让客户端调用定义在 `RouteGuide` 服务中的方法。
 

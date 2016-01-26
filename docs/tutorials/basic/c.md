@@ -243,7 +243,7 @@ void RunServer(const std::string& db_path) {
 3. 在生成器的 `AddListeningPort()` 方法中指定客户端请求时监听的地址和端口。
 4. 用生成器注册我们的服务实现。
 5. 调用生成器的 `BuildAndStart()` 方法为我们的服务创建和启动一个RPC服务器。
-5. 调用服务器的 `Wait()` 方法实现阻塞等待，直到进程被杀死或者 `Shutdown()` 被调用。
+6. 调用服务器的 `Wait()` 方法实现阻塞等待，直到进程被杀死或者 `Shutdown()` 被调用。
 
 ## 创建客户端
 

@@ -3,9 +3,9 @@ layout: docs
 title: gRPC Basics - C++
 ---
 
-<h1 class="page-header">gRPC基础：C++</h1>
+# gRPC基础：C++
 
-<p class="lead">本教程提供了C++程序员如何使用gRPC的指南.</p>
+本教程提供了C++程序员如何使用gRPC的指南。
 
 通过学习教程中例子，你可以学会如何：
 
@@ -16,8 +16,6 @@ title: gRPC Basics - C++
 假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
 
 这算不上是一个在 C++ 中使用 gRPC 的综合指南：以后会有更多的参考文档.
-
-<div id="toc"></div>
 
 ## 为什么使用 gRPC?
 
@@ -33,7 +31,7 @@ title: gRPC Basics - C++
 $ git clone https://github.com/grpc/grpc.git
 ```
 
-改变当前的目录到`examples/cpp/route_guide`：
+改变当前的目录到 `examples/cpp/route_guide`：
 ```
 $ cd examples/cpp/route_guide
 ```

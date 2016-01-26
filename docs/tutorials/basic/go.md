@@ -9,11 +9,11 @@ title: gRPC Basics - Go
 
 通过学习教程中例子，你可以学会如何：
 
-- 在一个 .proto 文件内定义服务.
-- 用 protocol buffer 编译器生成服务器和客户端代码.
-- 使用 gRPC 的 Go API 为你的服务实现一个简单的客户端和服务器.
+- 在一个 .proto 文件内定义服务。
+- 用 protocol buffer 编译器生成服务器和客户端代码。
+- 使用 gRPC 的 Go API 为你的服务实现一个简单的客户端和服务器。
 
-假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容。
 
 这算不上是一个在 Go 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
@@ -22,7 +22,7 @@ title: gRPC Basics - Go
 
 我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
-有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行接口更新。
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了不同语言及环境间通信的复杂性.使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行接口更新。
 
 ## 例子的代码和设置
 
@@ -51,7 +51,7 @@ service RouteGuide {
 }
 ```
 
-然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，这些都在 `RouteGuide` 服务中使用：
 
 - 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
@@ -184,7 +184,7 @@ func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb
 ```
 该方法传入了 RPC 的上下文对象，以及客户端的 `Point` protocol buffer请求。它返回了一个包含响应信息和`error` 的 `Feature` protocol buffer对象。在方法中我们用适当的信息填充 `Feature`，然后将其和一个`nil`错误一起返回，告诉 gRPC 我们完成了对 RPC 的处理，并且 `Feature` 可以返回给客户端。
 
-#### 服务器端流 RPC
+#### 服务器端流式 RPC
 现在让我们来看看我们的一种流式 RPC。 `ListFeatures` 是一个服务器端的流式 RPC，所以我们需要将多个 `Feature` 发回给客户端。
 
 ```go
@@ -204,7 +204,7 @@ func (s *routeGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide
 
 在这个方法中，我们填充了尽可能多的 `Feature` 对象去返回，用它们的 `Send()` 方法把它们写入 `RouteGuide_ListFeaturesServer`。最后，在我们的简单 RPC中，我们返回了一个 `nil` 错误告诉 gRPC 响应的写入已经完成。如果在调用过程中发生任何错误，我们会返回一个非 `nil` 的错误；gRPC 层会将其转化为合适的 RPC 状态通过线路发送。
 
-#### 客户端流 RPC
+#### 客户端流式 RPC
 现在让我们看看稍微复杂点的东西：客户端流方法 `RecordRoute`，我们通过它可以从客户端拿到一个 `Point` 的流，其中包括它们路径的信息。如你所见，这次这个方法没有请求参数。相反的，它拿到了一个 `RouteGuide_RecordRouteServer` 流，服务器可以用它来同时读 *和* 写消息——它可以用自己的 `Recv()` 方法接收客户端消息并且用 `SendAndClose()` 方法返回它的单个响应。
 
 ```go

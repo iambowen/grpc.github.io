@@ -25,7 +25,7 @@ title: gRPC Basics - C#
 
 我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
-有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了不同语言间通信的复杂性以及环境的不同。使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行的接口更新。
+有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了不同语言及环境间通信的复杂性。使用 protocol buffers 还能获得其他好处，包括高效的序列号，简单的 IDL 以及容易进行的接口更新。
 
 ## 例子代码和设置
 
@@ -54,7 +54,7 @@ service RouteGuide {
 }
 ```
 
-然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，在 `RouteGuide` 服务中都有使用：
+然后在你的服务中定义 `rpc` 方法，指定请求的和响应类型。gRPC允 许你定义4种类型的 service 方法，这些都在 `RouteGuide` 服务中使用：
 
 - 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
@@ -190,7 +190,7 @@ public async Task ListFeatures(Rectangle request,
 
 如你所见，这里的请求对象是一个 `Rectangle`，客户端期望从中找到 `Feature`，但是我们需要使用异步方法 `WriteAsync` 写入响应到 `IServerStreamWriter` 异步流而不是一个简单的响应。
 
-#### 客户端流 RPC
+#### 客户端流式 RPC
 
 类似的，客户端流方法 `RecordRoute` 使用一个[IAsyncEnumerator](https://github.com/Reactive-Extensions/Rx.NET/blob/master/Ix.NET/Source/System.Interactive.Async/IAsyncEnumerator.cs)，使用异步方法 `MoveNext` 和 `Current` 属性去读取请求的流。
 
@@ -232,7 +232,7 @@ public async Task<RouteSummary> RecordRoute(Grpc.Core.IAsyncStreamReader<Point> 
 }
 ```
 
-#### 双向流 RPC
+#### 双向流式 RPC
 
 最后，让我们来看看双向流 RPC `RouteChat`。
 

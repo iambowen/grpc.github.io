@@ -3,19 +3,19 @@ layout: docs
 title: gRPC Basics - Java
 ---
 
-# gRPC 基础: Java
+# gRPC 基础： Java
 
 本教程提供了 Java 程序员如何使用 gRPC 的指南。
 
 通过学习教程中例子，你可以学会如何：
 
-- 在一个 .proto 文件内定义服务.
-- 用 protocol buffer 编译器生成服务器和客户端代码.
-- 使用 gRPC 的 Java API 为你的服务实现一个简单的客户端和服务器.
+- 在一个 .proto 文件内定义服务。
+- 用 protocol buffer 编译器生成服务器和客户端代码。
+- 使用 gRPC 的 Java API 为你的服务实现一个简单的客户端和服务器。
 
-假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容。
 
-这算不上是一个在 Java 中使用 gRPC 的综合指南：以后会有更多的参考文档.
+这算不上是一个在 Java 中使用 gRPC 的综合指南：以后会有更多的参考文档。
 
 
 ## 为什么使用 gRPC?
@@ -25,8 +25,8 @@ title: gRPC Basics - Java
 路由信息，如服务器和其他客户端的流量更新。
 
 有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端
-和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了
-不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序
+和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了
+不同语言及环境间通信的复杂性。使用 protocol buffers 还能获得其他好处，包括高效的序
 列号，简单的 IDL 以及容易进行接口更新。
 
 ## 例子的代码和设置
@@ -38,13 +38,13 @@ title: gRPC Basics - Java
 $ git clone https://github.com/grpc/grpc-java.git
 ```
 
-然后改变当前的目录到 `grpc-java/examples`:
+然后改变当前的目录到 `grpc-java/examples`：
 
 ```
 $ cd grpc-java/examples
 ```
 
-你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，请查看下面的设置指南[ Java快速开始指南](/docs/installation/java.html)。
+你还需要安装生成服务器和客户端的接口代码相关工具——如果你还没有安装的话，请查看下面的设置指南[ Java快速开始指南](/docs/installation/java.html)。
 
 ## 定义服务
 
@@ -69,7 +69,7 @@ service RouteGuide {
 ```
 
 然后在我们的服务中定义 `rpc` 方法，指定它们的请求的和响应类型。gRPC允 许你定义4种类型的
-service 方法，在 `RouteGuide` 服务中都有使用：
+service 方法，这些都在 `RouteGuide` 服务中使用：
 
 - 一个 *简单 RPC* ， 客户端使用存根发送请求到服务器并等待响应返回，就像平常的函数调用一样。
 
@@ -131,7 +131,7 @@ buffer 的编译器 `protoc` 以及一个特殊的 gRPC Java 插件来完成。�
 proto3 语法）。
 
 这个例子使用的构建系统也是 Java gRPC 本身构建的一部分——为了简单起见，我们推荐使用为这个例子
-提前生成的代码。你可以参考[README](https://github.com/grpc/grpc-java/blob/master/README.md)zh学习如何从你的 .proto 文件中生成代码。
+提前生成的代码。你可以参考[README](https://github.com/grpc/grpc-java/blob/master/README.md)学习如何从你的 .proto 文件中生成代码。
 
 从这里[src/generated/main](https://github.com/grpc/grpc-java/tree/master/examples/src/generated/main)可以看到为了例子预生成的代码。
 
@@ -169,7 +169,7 @@ private static class RouteGuideService implements RouteGuideGrpc.RouteGuide {
 ```
 #### 简单 RPC
 `routeGuideServer` 实现了我们所有的服务方法。首先让我们看看最简单的类型 `GetFeature`，它
-从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`.
+从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`。
 
 ```java
     @Override
@@ -239,7 +239,7 @@ private final Collection<Feature> features;
 
 这次我们得到了需要返回给客户端的足够多的 `Feature` 对象（在这个场景下，我们根据他们是否在我们的 `Rectangle` 请求中，从服务的特性集合中选择他们），并且使用 `onNext()` 方法轮流往响应观察者写入。最后，和简单 RPC 的例子一样，我们使用响应观察者的 `onCompleted()` 方法去告诉 gRPC 写入应答已完成。
 
-#### 客户端流 RPC
+#### 客户端流式 RPC
 现在让我们看看稍微复杂点的东西：客户端流方法 `RecordRoute`，我们通过它可以从客户端拿到一个 `Point` 的流，并且返回一个包括它们路径的信息 `RouteSummary`。
 
 ```java
@@ -286,7 +286,7 @@ private final Collection<Feature> features;
 
 如你所见，我们的方法和前面的方法类型相似，拿到一个 `StreamObserver` 应答观察者参数，但是这次它返回一个 `StreamObserver` 以便客户端写入它的 `Point`。
 
-在这个方法体重，我们返回了一个匿名 `StreamObserver` 实例，其中我们：
+在这个方法体中，我们返回了一个匿名 `StreamObserver` 实例，其中我们：
 
 - 覆写了 `onNext()` 方法，每次客户端写入一个 `Point` 到消息流时，拿到特性和其它信息。
 - 覆写了 `onCompleted()` 方法（在 *客户端* 结束写入消息时调用），用来填充和构建我们的 `RouteSummary`。然后我们用 `RouteSummary` 调用方法自己的的响应观察者的 `onNext()`，之后调用它的 `onCompleted()` 方法，结束服务器端的调用。
@@ -346,11 +346,11 @@ private final Collection<Feature> features;
 1. 创建我们服务实现类 `RouteGuideService` 的一个实例并且将其传给生成的 `RouteGuideGrpc` 类的静态方法 `bindService()` 去获得服务定义。
 3. 使用生成器的 `forPort()` 方法指定地址以及期望客户端请求监听的端口。
 4. 通过传入将 `bindService()` 返回的服务定义，用生成器注册我们的服务实现到生成器的 `addService()` 方法。
-5. 调用生成器上的 `build()` 和 `start()` 方法为我们的服务创建和启动一个 RPC 服务器。vice.
+5. 调用生成器上的 `build()` 和 `start()` 方法为我们的服务创建和启动一个 RPC 服务器。
 
 ## 创建客户端
 
-在这部分，我们将尝试为 `RouteGuide` 服务创建一个 Java 的客户端。你可以从[grpc-java/examples/src/main/java/io/grpc/examples/RouteGuideClient.java](https://github.com/grpc/grpc-java/blob/master/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideClient.java)看到我们完整的客户端例子代码.
+在这部分，我们将尝试为 `RouteGuide` 服务创建一个 Java 的客户端。你可以从[grpc-java/examples/src/main/java/io/grpc/examples/RouteGuideClient.java](https://github.com/grpc/grpc-java/blob/master/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideClient.java)看到我们完整的客户端例子代码。
 
 ### 创建存根
 
@@ -395,7 +395,7 @@ private final Collection<Feature> features;
 
 #### 服务器端流式 RPC
 
-Next, let's look at a server-side streaming call to `ListFeatures`, which returns a stream of geographical `Feature`s:
+接下来，让我们看一个对于 `ListFeatures` 的服务器端流式调用，这个调用会返回一个地理性的 `Feature` 流：
 
 ```java
       Rectangle request =
@@ -409,7 +409,7 @@ Next, let's look at a server-side streaming call to `ListFeatures`, which return
 
 #### 客户端流式 RPC
 
-现在看看稍微复杂点的东西：我们在客户端流方法 `RecordRoute`发送了一个 `Point` 流给服务器并且拿到一个 `RouteSummary`。为了这个方法，我们需要使用异步存根。如果你已经阅读了
+现在看看稍微复杂点的东西：我们在客户端流方法 `RecordRoute` 中发送了一个 `Point` 流给服务器并且拿到一个 `RouteSummary`。为了这个方法，我们需要使用异步存根。如果你已经阅读了
 [创建服务器](#server)，一些部分看起来很相近——异步流式 RPC 是在两端通过相似的方式实现的。
 
 ```java
@@ -470,7 +470,7 @@ Next, let's look at a server-side streaming call to `ListFeatures`, which return
 - 覆写了 `onNext()` 方法，在服务器把 `RouteSummary` 写入到消息流时，打印出返回的信息。
 - 覆写了 `onCompleted()` 方法（在 *服务器* 完成自己的调用时调用）去设置 `SettableFuture`，这样我们可以检查服务器是不是完成写入。
 
-之后，我们将 `StreamObserver` 传给异步存根的 `recordRoute()` 方法，拿到我们自己的 `StreamObserver` 请求观察者将 `Point` 发给服务器。一旦完成点的写入，我们使用请求观察者的 `onCompleted()` 方法告诉 gRPC 我们已经完成了客户端的写入。一旦我们完成，我们检查 `SettableFuture` 验证服务器已经完成写入。
+之后，我们将 `StreamObserver` 传给异步存根的 `recordRoute()` 方法，拿到我们自己的 `StreamObserver` 请求观察者将 `Point` 发给服务器。一旦完成点的写入，我们使用请求观察者的 `onCompleted()` 方法告诉 gRPC 我们已经完成了客户端的写入。一旦完成，我们就检查 `SettableFuture` 验证服务器是否已经完成写入。
 
 #### 双向流式 RPC
 

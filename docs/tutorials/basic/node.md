@@ -3,7 +3,7 @@ layout: docs
 title: gRPC Basics - Node.js
 ---
 
-# gRPC 基础: Node.js
+# gRPC 基础： Node.js
 
 本教程提供了 Node.js 程序员如何使用 gRPC 的指南。
 
@@ -17,9 +17,7 @@ title: gRPC Basics - Node.js
 
 这算不上是一个在 Java 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 
-
 ## 为什么使用 gRPC?
-
 
 我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互
 路由信息，如服务器和其他客户端的流量更新。
@@ -106,7 +104,6 @@ message Point {
 }
 ```
 
-
 ## Loading service descriptors from proto files
 
 The Node.js library dynamically generates service descriptors and client stub definitions from `.proto` files loaded at runtime.
@@ -122,7 +119,6 @@ var example = protoDescriptor.examples;
 
 Once you've done this, the stub constructor is in the `examples` namespace (`protoDescriptor.examples.RouteGuide`) and the service descriptor (which is used to create a server) is a property of the stub (`protoDescriptor.examples.RouteGuide.service`);
 
-<a name="server"></a>
 ## Creating the server
 
 First let's look at how we create a `RouteGuide` server. If you're only interested in creating gRPC clients, you can skip this section and go straight to [Creating the client](#client) (though you might find it interesting anyway!).

@@ -11,7 +11,7 @@ title: gRPC Basics - Objective-C
 - 用 protocol buffer 编译器生成客户端代码.
 - 使用 gRPC 的 Objective-C API 为你的服务实现一个简单的客户端.
 
-It assumes a passing familiarity with [protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). Note that the example in this tutorial uses the proto3 version of the protocol buffers language, which is currently in alpha release: you can find out more in the [proto3 language guide](https://developers.google.com/protocol-buffers/docs/proto3) and see the [release notes](https://github.com/google/protobuf/releases) for the new version in the protocol buffers Github repository.
+假设你已经熟悉了[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
 
 这算不上是一个在 Objective-C 中使用 gRPC 的综合指南：以后会有更多的参考文档.
 

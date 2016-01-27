@@ -4,21 +4,21 @@
 
 通过学习教程中例子，你可以学会如何：
 
-- 在一个 .proto 文件内定义服务.
-- 用 protocol buffer 编译器生成服务器和客户端代码.
-- 使用 gRPC 的 Ruby API 为你的服务实现一个简单的客户端和服务器.
+- 在一个 .proto 文件内定义服务。
+- 用 protocol buffer 编译器生成服务器和客户端代码。
+- 使用 gRPC 的 Ruby API 为你的服务实现一个简单的客户端和服务器。
 
-假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容。
 
-这算不上是一个在 Ruby 中使用 gRPC 的综合指南：以后会有更多的参考文档.
+这算不上是一个在 Ruby 中使用 gRPC 的综合指南：以后会有更多的参考文档。
 
 ## 为什么使用 gRPC?
 
 我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
 有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端
-和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了
-不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序
+和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了
+不同语言及环境间通信的复杂性。使用 protocol buffers 还能获得其他好处，包括高效的序
 列号，简单的 IDL 以及容易进行接口更新。
 
 ## 例子代码和设置
@@ -36,7 +36,7 @@ $ git clone https://github.com/grpc/grpc.git
 ```
 $ cd examples/ruby/route_guide
 ```
-你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，查看下面的设置指南[ Ruby快速开始指南](/docs/installation/python.html)。
+你还需要安装生成服务器和客户端的接口代码相关工具——如果你还没有安装的话，查看下面的设置指南[ Ruby快速开始指南](/docs/installation/python.html)。
 
 ## 定义服务
 
@@ -85,7 +85,7 @@ service RouteGuide {
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响应类型-比如，下面的`Point`消息类型：
+我们的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响应类型——比如，下面的`Point`消息类型：
 
 ```protobuf
 // Points are represented as latitude-longitude pairs in the E7 representation
@@ -116,7 +116,7 @@ $ protoc -I ../../protos --ruby_out=lib --grpc_out=lib --plugin=protoc-gen-grpc=
 - `lib/route_guide.pb` 定义了一个模块 `Examples::RouteGuide`
   - 包含了所有的填充，序列化和获取我们请求和响应消息类型的 protocol buffer 代码
 - `lib/route_guide_services.pb`，继承了 `Examples::RouteGuide` 以及存根和服务类
-   - 在定义 RouteGuide 服务实现时将 `Service` 类作为基类entations
+   - 在定义 RouteGuide 服务实现时用作基类的 `Service` 类
    - 用来访问远程 RouteGuide的类 `Stub`
 
 ## 创建服务器
@@ -130,7 +130,7 @@ $ protoc -I ../../protos --ruby_out=lib --grpc_out=lib --plugin=protoc-gen-grpc=
 
 你可以从[examples/ruby/route_guide/route_guide_server.rb](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide/route_guide_server.rb)看到 `RouteGuide` 服务器的例子。 现在让我们近距离瞧瞧它是如何工作的。
 
-### Implementing RouteGuide
+### 实现 RouteGuide
 
 如你所见，我们的服务器有一个继承生成的 `RouteGuide::Service` 的 `ServerImpl` 类：
 
@@ -139,7 +139,7 @@ $ protoc -I ../../protos --ruby_out=lib --grpc_out=lib --plugin=protoc-gen-grpc=
 class ServerImpl < RouteGuide::Service
 ```
 
-`ServerImpl` 实现了所有的服务方法。首先让我们看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`.
+`ServerImpl` 实现了所有的服务方法。首先让我们看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 对象，然后返回包含从数据库拿到的feature信息的 `Feature`。
 
 ```ruby
   def get_feature(point, _call)
@@ -150,9 +150,9 @@ class ServerImpl < RouteGuide::Service
   end
 ```
 
-方法为 RPC 传入一个 _call，客户端的 `Point` protocol buffer 请求，并且返回一个 `Feature` protocol buffer。在方法中我们用适当的信息创建了 `Feature`，然后 `return`。
+方法被传入一个 RPC 调用，也就是客户端的 `Point` protocol buffer 请求，并且返回一个 `Feature` protocol buffer。在方法中我们用适当的信息创建了 `Feature`，然后 `return`。
 
-现在看看稍微复杂点的东西 —— 一个流 RPC。`ListFeatures` 是一个服务器端流式 RPC，所以我们需要发回多个 `Feature` 给客户端。
+现在看看稍微复杂点的东西 —— 一个流式 RPC。`ListFeatures` 是一个服务器端流式 RPC，所以我们需要发回多个 `Feature` 给客户端。
 
 ```ruby
 # in ServerImpl
@@ -164,7 +164,7 @@ class ServerImpl < RouteGuide::Service
 
 如你所见，这里的请求对象是一个 `Rectangle`，客户端期望从中找到 `Feature`，但是我们需要返回一个产生应答的[Enumerator](http://ruby-doc.org//core-2.2.0/Enumerator.html)而不是一个简单应答。在方法中，我们使用帮助类 `RectangleEnum` 作为一个 Enumerator 的实现。
 
-类似的，客户端流方法 `record_route` 使用一个[Enumerable](http://ruby-doc.org//core-2.2.0/Enumerable.html)，但是这里是从调用对象获得，我们在先前的例子中略过了这点。`call.each_remote_read` 会一次产生由客户端发送的消息。
+类似的，客户端流方法 `record_route` 使用一个[Enumerable](http://ruby-doc.org//core-2.2.0/Enumerable.html)，但是这里是从调用对象获得，我们在先前的例子中略过了这点。`call.each_remote_read` 会依次产生由客户端发送的消息。
 
 ```ruby
   call.each_remote_read do |point|
@@ -192,7 +192,7 @@ class ServerImpl < RouteGuide::Service
 
 ### 启动服务器
 
-一旦我们实现了所有的方法，我们还需要启动一个gRPC服务器，这样客户端才可以使用服务。下面这段代码展示了在我们`RouteGuide`服务中实现的过程：
+一旦我们实现了所有的方法，我们还需要启动一个 gRPC 服务器，这样客户端才可以使用服务。下面这段代码展示了在我们 `RouteGuide` 服务中实现的过程：
 
 ```ruby
   s = GRPC::RpcServer.new
@@ -210,7 +210,7 @@ class ServerImpl < RouteGuide::Service
 
 ## 创建客户端
 
-在这部分，我们将尝试为 `RouteGuide` 服务创建一个 Ruby 的客户端。你可以从[examples/ruby/route_guide/route_guide_client.rb](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide/route_guide_client.rb)看到我们完整的客户端例子代码.
+在这部分，我们将尝试为 `RouteGuide` 服务创建一个 Ruby 的客户端。你可以从[examples/ruby/route_guide/route_guide_client.rb](https://github.com/grpc/grpc/blob/{{ site.data.config.grpc_release_branch }}/examples/ruby/route_guide/route_guide_client.rb)看到我们完整的客户端例子代码。
 
 ### 创建存根
 
@@ -243,7 +243,7 @@ GET_FEATURE_POINTS = [
   end
 ```
 
-我们创建和填充了一个请求 protocol buffer 对象（在这个场景下是 `Point`），并且创建了一个应答 protocol buffer 对象让服务器去填充。最后，我们调用存根上的方法，传入上下文，请求以及应答。如果方法返回 `OK`，那么我们就可以从服务器从我们的应答对象中读取应答信息。
+我们创建和填充了一个请求 protocol buffer 对象（在这个场景下是 `Point`），并且创建了一个应答 protocol buffer 对象让服务器去填充。最后，我们调用存根上的方法，传入上下文，请求以及应答。如果方法返回 `OK`，那么我们就可以从服务器给我们的应答对象中读取应答信息。
 
 #### 流式 RPC
 

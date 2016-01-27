@@ -5,26 +5,26 @@
 
 通过学习教程中例子，你可以学会如何：
 
-- 在一个 .proto 文件内定义服务.
-- 用 protocol buffer 编译器生成服务器和客户端代码.
-- 使用 gRPC 的 Python API 为你的服务实现一个简单的客户端和服务器.
+- 在一个 .proto 文件内定义服务。
+- 用 protocol buffer 编译器生成服务器和客户端代码。
+- 使用 gRPC 的 Python API 为你的服务实现一个简单的客户端和服务器。
 
-假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview). 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容.
+假设你已经阅读了[概览](/docs/index.html)并且熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto3 版本，它目前只是 alpha 版：可以在[ proto3 语言指南](https://developers.google.com/protocol-buffers/docs/proto3)和 protocol buffers 的 Github 仓库的[版本注释](https://github.com/google/protobuf/releases)发现更多关于新版本的内容。
 
-这算不上是一个在 Python 中使用 gRPC 的综合指南：以后会有更多的参考文档.
+这算不上是一个在 Python 中使用 gRPC 的综合指南：以后会有更多的参考文档。
 
 ## 为什么使用 gRPC?
 
 我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互路由信息，如服务器和其他客户端的流量更新。
 
 有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端
-和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了
-不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序
+和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了
+不同语言及环境间通信的复杂性。使用 protocol buffers 还能获得其他好处，包括高效的序
 列号，简单的 IDL 以及容易进行接口更新。
 
 ## 例子代码和设置
 
-教程的代码在这里 [grpc/grpc/examples/python/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/python/route_guide)。 要下载例子，通过运行下面的命令去克隆`grpc`代码库：
+教程的代码在这里 [grpc/grpc/examples/python/route_guide](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/python/route_guide)。 要下载例子，请通过运行下面的命令去克隆`grpc`代码库：
 
 ```
 $ git clone https://github.com/grpc/grpc.git
@@ -35,7 +35,7 @@ $ git clone https://github.com/grpc/grpc.git
 ```
 $ cd examples/python/route_guide
 ```
-你还需要安装生成服务器和客户端的接口代码相关工具-如果你还没有安装的话，查看下面的设置指南[ Python快速开始指南](/docs/installation/python.html)。
+你还需要安装生成服务器和客户端的接口代码相关工具——如果你还没有安装的话，查看下面的设置指南[ Python快速开始指南](/docs/installation/python.html)。
 
 ## 定义服务
 
@@ -85,7 +85,7 @@ service RouteGuide {
   rpc RouteChat(stream RouteNote) returns (stream RouteNote) {}
 ```
 
-你的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响应类型-比如，下面的`Point`消息类型：
+你的 .proto 文件也包含了所有请求的 protocol buffer 消息类型定义以及在服务方法中使用的响应类型——比如，下面的`Point`消息类型：
 
 ```protobuf
 // Points are represented as latitude-longitude pairs in the E7 representation
@@ -112,7 +112,7 @@ $ protoc -I ../../protos --python_out=. --grpc_out=. --plugin=protoc-gen-grpc=`w
 
 - 定义在 route_guide.proto 中的消息类
 - 定义在 route_guide.proto 中的服务的抽象类
-   - `BetaRouteGuideServicer`， 定义了 RouteGuide 服务实现的接口rvice
+   - `BetaRouteGuideServicer`， 定义了 RouteGuide 服务实现的接口
    - `BetaRouteGuideStub`，可以被客户端用来激活 RouteGuide RPC
 - 应用使用的函数
    - `beta_create_RouteGuide_server`，根据已有的 `BetaRouteGuideServicer` 对象创建一个 gRPC 服务器
@@ -141,7 +141,7 @@ class RouteGuideServicer(route_guide_pb2.BetaRouteGuideServicer):
 
 #### 简单 RPC
 
-首先让我们看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`.
+首先让我们看看最简单的类型 `GetFeature`，它从客户端拿到一个 `Point` 对象，然后从返回包含从数据库拿到的feature信息的 `Feature`。
 
 ```python
   def GetFeature(self, request, context):
@@ -152,7 +152,7 @@ class RouteGuideServicer(route_guide_pb2.BetaRouteGuideServicer):
       return feature
 ```
 
-方法传入了一个 `route_guide_pb2.Point` 的 RPC 请求，以及一个提供了 RPC-specific 信息，如超时限制，的 `ServicerContext`对象。
+方法传入了一个 `route_guide_pb2.Point` 的 RPC 请求，以及一个提供了 RPC-specific 信息，如超时限制，的 `ServicerContext` 对象。
 
 #### 应答流式 RPC
 
@@ -228,7 +228,7 @@ def serve():
   server.start()
 ```
 
-因为 `start()` 不会阻塞，如果运行时没有其它的代码，你可能需要循环等待。
+因为 `start()` 不会阻塞，如果运行时你的代码没有其它的事情可做，你可能需要循环等待。
 
 ## 创建客户端
 
@@ -249,7 +249,7 @@ stub = beta_create_RouteGuide_stub(channel)
 
 ### 调用服务方法
 
-对于返回单个应答的 RPC 方法（"response-unary" 方法），gRPC Python 同时支持同步（阻塞）和异步（非阻塞）的控制流语义。对于应带流式 RPC 方法，调用会立即返回一个应答值的迭代器。调用迭代器的 `next()` 方法会阻塞，直到从迭代器产生的应答变得可用。
+对于返回单个应答的 RPC 方法（"response-unary" 方法），gRPC Python 同时支持同步（阻塞）和异步（非阻塞）的控制流语义。对于应答流式 RPC 方法，调用会立即返回一个应答值的迭代器。调用迭代器的 `next()` 方法会阻塞，直到从迭代器产生的应答变得可用。
 
 #### 简单 RPC
 

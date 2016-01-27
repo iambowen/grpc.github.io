@@ -1,8 +1,3 @@
----
-layout: docs
-title: gRPC Basics - Java
----
-
 # gRPC 基础： Java
 
 本教程提供了 Java 程序员如何使用 gRPC 的指南。
@@ -359,7 +354,7 @@ private final Collection<Feature> features;
 - 一个 *阻塞/同步* 存根：这意味着 RPC 调用等待服务器响应，并且要么返回应答，要么造成异常。
 - 一个 *非阻塞/异步* 存根可以向服务器发起非阻塞调用，应答会异步返回。你可以使用异步存根去发起特定类型的流式调用。
 
-我们首先为存根创建一个 gRPC *channel*，指明服务器地址和我们想连接的端口号：
+我们首先为存根创建一个 gRPC *channel*，指定我们想连接的服务器地址和端口：
 
 ```java
  channel = NettyChannelBuilder.forAddress(host, port)

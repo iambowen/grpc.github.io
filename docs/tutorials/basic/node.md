@@ -1,8 +1,3 @@
----
-layout: docs
-title: gRPC Basics - Node.js
----
-
 # gRPC 基础： Node.js
 
 本教程提供了 Node.js 程序员如何使用 gRPC 的指南。

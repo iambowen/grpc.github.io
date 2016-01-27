@@ -1,8 +1,3 @@
----
-layout: docs
-title: gRPC Basics - Objective-C
----
-
 # gRPC 基础： Objective-C
 
 本教程提供了 Objective-C 程序员如何使用 gRPC 的指南。通过学习教程中例子，你可以学会如何：
@@ -164,7 +159,7 @@ $ protoc -I ../../protos --objc_out=Pods/RouteGuide --objcgrpc_out=Pods/RouteGui
 
 ### 构造一个服务对象
 
-要调用一个服务方法，我们首先需要创建一个服务对象，生成的 `RTGRouteGuide` 类的一个实例。该类的初始化期望一个带有服务器地址以及我们期望连接端口的 `NSString *` ：
+要调用一个服务方法，我们首先需要创建一个服务对象，生成的 `RTGRouteGuide` 类的一个实例。该类的初始化需要一个带有我们希望连接的服务器地址以及端口的 `NSString *` ：
 
 ```objective-c
 #import <GRPCClient/GRPCCall+Tests.h>

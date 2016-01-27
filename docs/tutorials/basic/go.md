@@ -1,8 +1,3 @@
----
-layout: docs
-title: gRPC Basics - Go
----
-
 # gRPC 基础: Go
 
 本教程提供了 Go 程序员如何使用 gRPC 的指南。

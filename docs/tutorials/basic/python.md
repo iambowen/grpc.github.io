@@ -1,8 +1,3 @@
----
-layout: docs
-title: gRPC Basics - Python
----
-
 # gRPC 基础: Python
 
 

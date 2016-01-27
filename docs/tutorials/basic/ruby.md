@@ -1,8 +1,3 @@
----
-layout: docs
-title: gRPC Basics - Ruby
----
-
 # gRPC 基础: Ruby
 
 本教程提供了 Python 程序员如何使用 gRPC 的指南。

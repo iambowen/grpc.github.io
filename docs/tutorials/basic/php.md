@@ -1,28 +1,23 @@
----
-layout: docs
-title: gRPC Basics - PHP
----
-
 # gRPC 基础: PHP
 本教程提供了 PHP 程序员如何使用 gRPC 的指南。
 
 通过学习教程中例子，你可以学会如何：
 
-- 在一个 .proto 文件内定义服务.
-- 用 protocol buffer 编译器生成服务器和客户端代码.
-- 使用 gRPC 的 PHP API 为你的服务实现一个简单的客户端和服务器.
+- 在一个 .proto 文件内定义服务。
+- 用 protocol buffer 编译器生成服务器和客户端代码。
+- 使用 gRPC 的 PHP API 为你的服务实现一个简单的客户端和服务器。
 
 假设你已经熟悉[protocol buffers](https://developers.google.com/protocol-buffers/docs/overview)。 注意，教程中的例子使用的是 protocol buffers 语言的 proto2 版本。
 
 同时注意目前你只能用 PHP 创建 gRPC 服务的客户端——你可以从我们的其他教程中，如[Node.js](/docs/tutorials/basic/node.html)，找到如何创建 gRPC 服务器的例子。
 
-这算不上是一个在 PHP 中使用 gRPC 的综合指南：以后会有更多的参考文档.
+这算不上是一个在 PHP 中使用 gRPC 的综合指南：以后会有更多的参考文档。
 
 ## 为什么使用 gRPC?
 
 有了 gRPC， 我们可以一次性的在一个 .proto 文件中定义服务并使用任何支持它的语言去实现客户端
-和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑- gRPC 帮你解决了
-不同语言间通信的复杂性以及环境的不同.使用 protocol buffers 还能获得其他好处，包括高效的序
+和服务器，反过来，它们可以在各种环境中，从Google的服务器到你自己的平板电脑—— gRPC 帮你解决了
+不同语言及环境间通信的复杂性。使用 protocol buffers 还能获得其他好处，包括高效的序
 列号，简单的 IDL 以及容易进行接口更新。
 
 ## 例子的代码和设置
@@ -42,7 +37,7 @@ $ cd examples/php/route_guide
 我们的例子是一个简单的路由映射的应用，它允许客户端获取路由特性的信息，生成路由的总结，以及交互
 路由信息，如服务器和其他客户端的流量更新。
 
-你还需要安装生成客户端的接口代码的相关工具（以及一个用其他语言实现的服务器，出于测试的目的）-如果你还没有安装的话，请查看下面的设置指南[这些设置指南](https://github.com/grpc/homebrew-grpc)。
+你还需要安装生成客户端的接口代码的相关工具（以及一个用其他语言实现的服务器，出于测试的目的）——如果你还没有安装的话，请查看下面的设置指南[这些设置指南](https://github.com/grpc/homebrew-grpc)。
 
 ## 来试试吧！
 
@@ -125,9 +120,7 @@ message Point {
 
 ## 生成客户端代码
 
-接下来我们需要从 .proto 的服务定义中生成 gRPC 客户端接口。我们通过 protocol buffer 的编译器 `protoc` 以及一个特殊的 gRPC Objective-C 插件来完成。
-
-可以用[`protoc-gen-php`](https://github.com/datto/protobuf-php)工具从 proto 文件中生成 PHP 客户端存根实现。安装这个工具，运行：
+可以用[`protoc-gen-php`](https://github.com/datto/protobuf-php)工具从 proto 文件中生成 PHP 客户端存根实现。要安装这个工具，运行：
 
 ```sh
 $ cd examples/php
@@ -162,7 +155,7 @@ require dirname(__FILE__) . '/route_guide.php';
 
 ### 构造一个客户端对象
 
-要调用一个服务方法，我们首先需要创建一个客户端对象，生成的 `RouteGuideClient` 类的一个实例。该类的构造函数接受一个服务器地址以及我们想连接端口：
+要调用一个服务方法，我们首先需要创建一个客户端对象，生成的 `RouteGuideClient` 类的一个实例。该类的构造函数接受一个我们想连接的服务器地址和端口：
 
 ```php
 $client = new examples\RouteGuideClient('localhost:50051', []);
@@ -187,7 +180,7 @@ $client = new examples\RouteGuideClient('localhost:50051', []);
 
 ```php
   print sprintf("Found %s \n  at %f, %f\n", $feature->getName(),
-                $feature->getLocation()->getLatitude() / COORD_FACTOR,
+                $feature->getLocation()->getLatitude() / COORD_FACTOR，
                 $feature->getLocation()->getLongitude() / COORD_FACTOR);
 ```
 
@@ -216,7 +209,7 @@ $client = new examples\RouteGuideClient('localhost:50051', []);
   } // the loop will end when the server indicates there is no more responses to be sent.
 ```
 
-`$call->responses()` 方法调用返回一个迭代器。当服务器发送应答时，`foreach` 循环中会返回一个 `$feature` 对象，知道服务器表示没有更多的应答发送。
+`$call->responses()` 方法调用返回一个迭代器。当服务器发送应答时，`foreach` 循环中会返回一个 `$feature` 对象，直到服务器表示没有更多的应答发送。
 
 客户端流方法 `RecordRoute` 的使用很类似，除了我们为每个从客户端写入的每个点调用 `$call->write($point)` ，并拿到一个 `examples\RouteSummary` 返回。
 
@@ -230,7 +223,7 @@ $client = new examples\RouteGuideClient('localhost:50051', []);
     $call->write($point);
   }
 
-  list($route_summary, $status) = $call->wait();
+  list($route_summary， $status) = $call->wait();
 ```
 
 最后，让我们看看双向流式 RPC `routeChat()`。在这个场景下，我们给方法传入一个上下文，拿到一个 `BidiStreamingCall` 流对象的返回，我们可以用这个流对象读写消息。

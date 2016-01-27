@@ -25,9 +25,9 @@ $ git submodule update --init
 $ cd examples/objective-c/auth_sample
 ```
 
-我们的例子是一个有两个view的简单应用。一地个view让用户使用 Google 的[iOS 登陆类库](https://developers.google.com/identity/sign-in/ios/)的 OAuth2 工作流去登陆和登出。（例子中用到了 Google 的类库，是因为我们要调用的测试 gRPC 服务需要 Google 账号身份，但是 gRPC 和 Objective-C 客户端类库都没有连接任何 OAuth2 提供商）。第二个view使用第一个view获得的 access token 向测试服务器发起 gRPC 请求。
+我们的例子是一个有两个视图的简单应用。第一个视图让用户使用 Google 的[iOS 登陆类库](https://developers.google.com/identity/sign-in/ios/)的 OAuth2 工作流去登陆和登出。（例子中用到了 Google 的类库，是因为我们要调用的测试 gRPC 服务需要 Google 账号身份，但是 gRPC 和 Objective-C 客户端类库都没有绑定任何特定的 OAuth2 提供商）。第二个视图使用第一个视图获得的 access token 向测试服务器发起 gRPC 请求。
 
-注意：OAuth2 类库需要应用注册并且从身份提供者获得一个 ID（在例子应用中是 Google）。应用的 XCode 项目配置使用那个 ID，所以你不应该拷贝这个工程”当做是“自己的应用：这会导致你的应用程序作为 "gRPC-AuthSample" 在同意屏幕被确定，并且不能访问真正的 Google 服务。相反，根据[指南](https://developers.google.com/identity/sign-in/ios/)去配置你自己的 XCode 工程。
+注意：OAuth2 类库需要应用注册并且从身份提供者获得一个 ID（在例子应用中是 Google）。应用的 XCode 项目配置使用那个 ID，所以你不应该拷贝这个工程”当做是“自己的应用：这会导致你的应用程序作为 "gRPC-AuthSample" 在同意界面被确定，并且不能访问真正的 Google 服务。相反，根据[指南](https://developers.google.com/identity/sign-in/ios/)去配置你自己的 XCode 工程。
 
 在使用其它的 Objective-C 例子时，你应该已经安装了[Cocoapods](https://cocoapods.org/#install)，还有相关的生成客户端类库代码的工具。你也可以按照[这些设置指南](https://github.com/grpc/homebrew-grpc)得到后者。
 
@@ -43,7 +43,7 @@ $ pod install
 
 最后，打开 Cocoapods 创建的 XCode workspace，运行应用。
 
-第一个 view `SelectUserViewController.h/m`，要求你用 Google 账户登录，授于 "gRPC-AuthSample" 应用如下的权限：
+第一个视图 `SelectUserViewController.h/m`，要求你用 Google 账户登录，授于 "gRPC-AuthSample" 应用如下的权限：
 
 - 查看你的邮件地址。
 - 查看你基本的档案信息。
@@ -51,11 +51,11 @@ $ pod install
 
 最后一个权限，对应的范围是 `https://www.googleapis.com/auth/xapi.zoo`，并没有给予任何正式的能力：这只是用来测试。你随时可以登出。
 
-第二个 view `MakeRPCViewController.h/m`，向位于 https://grpc-test.sandbox.google.com 的测试服务器发起 gRPC 请求，包括 access token 。测试服务器只是检验了 token，而后将它所属的用户以及授予访问的范围写入到应答中。（客户端应用已经知道这两个值；这是一种验证所有事情如我们所料的方式）。
+第二个视图 `MakeRPCViewController.h/m`，向位于 https://grpc-test.sandbox.google.com 的测试服务器发起 gRPC 请求，包括 access token 。测试服务器只是检验了 token，而后将它所属的用户以及授予访问的范围写入到应答中。（客户端应用已经知道这两个值；这是验证所有事情都按照我们期望方式进行的一种方法）。
 
 下一个部分的指南会一步步指导你如何实行 `MakeRPCViewController` 中的 gRPC 调用。你可以在[MakeRPCViewController.m](https://github.com/grpc/grpc/blob/master/examples/objective-c/auth_sample/MakeRPCViewController.m)看到完整例子的代码。
 
-## 创建 RPC 客户端
+## 创建一个 RPC 对象
 
 另一个基本的教程展示如何通过调用生成的客户端对象中的异步方法来激活一个 RPC。但是，发起身份验证的调用需要你去初始化一个代表 RPC 的对象，在发起网络请求 _前_ 配置好它。首先让我们看看如何创建 RPC 对象。
 
@@ -118,7 +118,7 @@ call.requestHeaders[@"Authorization"] = [@"Bearer " stringByAppendingString:acce
 
 ## 拿到应答元数据：验证挑战头
 
-`ProtoRPC` 类也继承了一对属性，`responseHeaders` 和 `responseTrailers`， 类似于请求元数据，我们只是看着而是由服务器向客户端发回。它们的定义如下：
+`ProtoRPC` 类也继承了一对属性，`responseHeaders` 和 `responseTrailers`， 类似于我们刚刚看的请求元数据，不过却是由服务器向客户端发回的。它们的定义如下：
 
 ```objective-c
 @property(atomic, readonly) NSDictionary *responseHeaders;

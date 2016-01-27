@@ -3,27 +3,20 @@ layout: docs
 title: OAuth2 on gRPC - Objective-C
 ---
 
-<h1 class="page-header">OAuth2 on gRPC: Objective-C</h1>
+# 在 gRPC 上使用 OAuth2: Objective-C
 
-This example demonstrates how to use OAuth2 on gRPC to make authenticated API calls on
-behalf of a user. By walking through it you'll also learn how to use the Objective-C gRPC API to:
+这个例子展示了如何在 gRPC 上使用 OAuth2 代表用户发起身份验证 API 调用。通过它你还会学到如何
+使用 Objective-C gRPC API 去：
 
-- Initialize and configure a remote call object before the RPC is started.
-- Set request metadata elements on a call, which are semantically equivalent to HTTP request
-headers.
-- Read response metadata from a call, which is equivalent to HTTP response headers and trailers.
+- 在 RPC 启动前初始化和配置一个远程调用对象。
+- 在一个调用上设置请求的元数据元素，语义上等同于 HTTP 的请求头部。
+- 从调用上读取应答的元数据，等同于 HTTP 应答的头和尾。
 
-It assumes you know the basics on how to make gRPC API calls using the Objective-C client library,
-as shown in [gRPC Basics: Objective-C](/docs/tutorials/basic/objective-c.html) and the [overview](/docs/index.html),
-and are familiar with OAuth2 concepts like _access token_.
+假设你知道如何使用 Objective-C 的客户端类库去发起 gRPC 调用，如在[gRPC 基础: Objective-C](/docs/tutorials/basic/objective-c.html)和[概览](/docs/index.html)中介绍的那样，以及熟悉 OAuth2 的概念如 _access token_。
 
-<div id="toc"></div>
+## 例子代码和设置
 
-<a name="setup"></a>
-## Example code and setup
-
-The example code for our tutorial is in [gprc/examples/objective-c/auth_sample](https://github.com/grpc/grpc/tree/master/examples/objective-c/auth_sample).
-To download the example, clone this repository by running the following commands:
+我们教程的例子代码在这里[gprc/examples/objective-c/auth_sample](https://github.com/grpc/grpc/tree/master/examples/objective-c/auth_sample)。要下载这个例子，通过运行下面的命令克隆代码库：
 
 ```
 $ git clone https://github.com/grpc/grpc.git
@@ -31,72 +24,47 @@ $ cd grpc
 $ git submodule update --init
 ```
 
-Then change your current directory to `examples/objective-c/auth_sample`:
+然后切换目录到 `examples/objective-c/auth_sample`：
 
 ```
 $ cd examples/objective-c/auth_sample
 ```
 
-Our example is a simple application with two views. The first view lets a user sign in and out using
-the OAuth2 flow of Google's [iOS SignIn library](https://developers.google.com/identity/sign-in/ios/).
-(Google's library is used in this example because the test gRPC service we are going to call expects
-Google account credentials, but neither gRPC nor the Objective-C client library is tied to any
-specific OAuth2 provider). The second view makes a gRPC request to the test server, using the
-access token obtained by the first view.
+我们的例子是一个有两个view的简单应用。一地个view让用户使用 Google 的[iOS 登陆类库](https://developers.google.com/identity/sign-in/ios/)的 OAuth2 工作流去登陆和登出。（例子中用到了 Google 的类库，是因为我们要调用的测试 gRPC 服务需要 Google 账号身份，但是 gRPC 和 Objective-C 客户端类库都没有连接任何 OAuth2 提供商）。第二个view使用第一个view获得的 access token 向测试服务器发起 gRPC 请求。
 
-Note: OAuth2 libraries need the application to register and obtain an ID from the identity provider
-(in the case of this example app, Google). The app's XCode project is configured using that ID, so
-you shouldn't copy this project "as is" for your own app: it would result in your app being
-identified in the consent screen as "gRPC-AuthSample", and not having access to real Google
-services. Instead, configure your own XCode project following the [instructions here](https://developers.google.com/identity/sign-in/ios/).
+注意：OAuth2 类库需要应用注册并且从身份提供者获得一个 ID（在例子应用中是 Google）。应用的 XCode 项目配置使用那个 ID，所以你不应该拷贝这个工程”当做是“自己的应用：这会导致你的应用程序作为 "gRPC-AuthSample" 在同意屏幕被确定，并且不能访问真正的 Google 服务。相反，根据[指南](https://developers.google.com/identity/sign-in/ios/)去配置你自己的 XCode 工程。
 
-As with the other Objective-C examples, you also should have [Cocoapods](https://cocoapods.org/#install)
-installed, as well as the relevant tools to generate the client library code. You can obtain the
-latter by following [these setup instructions](https://github.com/grpc/homebrew-grpc).
+在使用其它的 Objective-C 例子时，你应该已经安装了[Cocoapods](https://cocoapods.org/#install)，还有相关的生成客户端类库代码的工具。你也可以按照[这些设置指南](https://github.com/grpc/homebrew-grpc)得到后者。
 
+## 来试试吧！
 
-<a name="try"></a>
-## Try it out!
-
-To try the sample app, first have Cocoapods generate and install the client library for our .proto
-files:
+要试试例子应用呢，首先为我们的 .proto 文件使用 Cocoapods 生成和安装客户端类库：
 
 ```
 $ pod install
 ```
 
-(This might have to compile OpenSSL, which takes around 15 minutes if Cocoapods doesn't have it yet
-on your computer's cache).
+（这也许需要编译 OpenSSL，如果你的电脑上没有 Cocoapods 的缓存，这也许要花上 15 分钟左右）。
 
-Finally, open the XCode workspace created by Cocoapods, and run the app.
+最后，打开 Cocoapods 创建的 XCode workspace，运行应用。
 
-The first view, `SelectUserViewController.h/m`, asks you to sign in with your Google account, and to
-give the "gRPC-AuthSample" app the following permissions:
+第一个 view `SelectUserViewController.h/m`，要求你用 Google 账户登录，授于 "gRPC-AuthSample" 应用如下的权限：
 
-- View your email address.
-- View your basic profile info.
-- "Test scope for access to the Zoo service".
+- 查看你的邮件地址。
+- 查看你基本的档案信息。
+- "访问 Zoo 服务的测试范围"。
 
-This last permission, corresponding to the scope `https://www.googleapis.com/auth/xapi.zoo` doesn't
-grant any real capability: it's only used for testing. You can log out at any time.
+最后一个权限，对应的范围是 `https://www.googleapis.com/auth/xapi.zoo`，并没有给予任何正式的能力：这只是用来测试。你随时可以登出。
 
-The second view, `MakeRPCViewController.h/m`, makes a gRPC request to a test server at
-https://grpc-test.sandbox.google.com, sending the access token along with the request. The test
-service simply validates the token and writes in its response which user it belongs to, and which
-scopes it gives access to. (The client application already knows those two values; it's a way to
-verify that everything went as expected).
+第二个 view `MakeRPCViewController.h/m`，向位于 https://grpc-test.sandbox.google.com 的测试服务器发起 gRPC 请求，包括 access token 。测试服务器只是检验了 token，而后将它所属的用户以及授予访问的范围写入到应答中。（客户端应用已经知道这两个值；这是一种验证所有事情如我们所料的方式）。
 
-The next sections guide you step-by-step through how the gRPC call in `MakeRPCViewController` is
-performed. You can see the complete code in [MakeRPCViewController.m](https://github.com/grpc/grpc/blob/master/examples/objective-c/auth_sample/MakeRPCViewController.m).
+下一个部分的指南会一步步指导你如何实行 `MakeRPCViewController` 中的 gRPC 调用。你可以在[MakeRPCViewController.m](https://github.com/grpc/grpc/blob/master/examples/objective-c/auth_sample/MakeRPCViewController.m)看到完整例子的代码。
 
-<a name="rpc-object"></a>
-## Create an RPC object
+## 创建 RPC 客户端
 
-The other basic tutorials show how to invoke an RPC by calling an asynchronous method in a generated
-client object. However, to make an authenticated call you need to initialize an object that represents the RPC, and configure it
-_before_ starting the network request. First let's look at how to create the RPC object.
+另一个基本的教程展示如何通过调用生成的客户端对象中的异步方法来激活一个 RPC。但是，发起身份验证的调用需要你去初始化一个代表 RPC 的对象，在发起网络请求 _前_ 配置好它。首先让我们看看如何创建 RPC 对象。
 
-Assume you have a proto service definition like this:
+假设你的 proto 服务定义如下：
 
 ```protobuf
 option objc_class_prefix = "AUTH";
@@ -106,8 +74,7 @@ service TestService {
 }
 ```
 
-A `unaryCallWithRequest:handler:` method, with which you're already familiar, is generated for the
-`AUTHTestService` class:
+为了 `AUTHTestService` 类生成的一个 `unaryCallWithRequest:handler:` 方法，你应该已经很熟悉了：
 
 ```objective-c
 [client unaryCallWithRequest:request handler:^(AUTHResponse *response, NSError *error) {
@@ -115,8 +82,7 @@ A `unaryCallWithRequest:handler:` method, with which you're already familiar, is
 }];
 ```
 
-In addition, an `RPCToUnaryCallWithRequest:handler:` method is generated, which returns a
-not-yet-started RPC object:
+此外，一个 `RPCToUnaryCallWithRequest:handler:` 被生成，它会返回一个还没有开始的 RPC 对象：
 
 ```objective-c
 #import <ProtoRPC/ProtoRPC.h>
@@ -127,66 +93,53 @@ ProtoRPC *call =
     }];
 ```
 
-You can start the RPC represented by this object at any later time like this:
+你可以像这样在任何以后的时间开始这个对象代表的 RPC：
 
 ```objective-c
 [call start];
 ```
-<a name="request-metadata"></a>
-## Setting request metadata: Auth header with an access token
+## 设置请求元数据：: 有一个 access token 的身份验证头
 
-Now let's look at how to configure some settings on the RPC object. The `ProtoRPC` class has a `requestHeaders`
-property (inherited from `GRPCCall`) defined like this:
+现在让我们看看如何配置 RPC 对象上的一些设置。`ProtoRPC` 有个 `requestHeaders` 属性（从 `GRPCCall` 继承）定义如下：
 
 ```objective-c
 @property(atomic, readonly) id<GRPCRequestHeaders> requestHeaders
 ```
 
-You can think of the `GRPCRequestHeaders` protocol as equivalent to the `NSMutableDictionary` class. Setting
-elements of this dictionary of metadata keys and values means this metadata will be sent on the wire when the call
-is started. gRPC metadata are pieces of information about the call sent by the client to the server
-(and vice versa). They take the form of key-value pairs and are essentially opaque to gRPC itself.
+你可以把 `GRPCRequestHeaders` 协议等同于 `NSMutableDictionary` 类。设置元数据键值的词典的元素意味着这个元数据在调用开始后将会被发送。gRPC 元数据是关于客户端发往服务器调用的信息片（反之亦然）。它们以键值对的形式存在，并且对于 gRPC 本身基本不透明。
 
-For convenience, the property is initialized with an empty `NSMutableDictionary`, so that request
-metadata elements can be set like this:
+方便起见，属性通过空的 `NSMutableDictionary` 初始化，以便请求元数据元素可以像下面一样设置：
 
 ```objective-c
 call.requestHeaders[@"My-Header"] = @"Value for this header";
 call.requestHeaders[@"Another-Header"] = @"Its value";
 ```
 
-A typical use of metadata is for authentication details, as in our example. If you have an access token, OAuth2 specifies it is to be sent in this format:
+元数据的典型使用是验证细节，像我们例子中一样。如果你已经有了 access token，OAuth2 指定它以下面的格式发送：
 
 ```objective-c
 call.requestHeaders[@"Authorization"] = [@"Bearer " stringByAppendingString:accessToken];
 ```
 
-<a name="response-metadata"></a>
-## Getting response metadata: Auth challenge header
+## 拿到应答元数据：验证挑战头
 
-The `ProtoRPC` class also inherits a pair of properties, `responseHeaders` and `responseTrailers`, analogous to the
-request metadata we just looked at but sent back by the server to the client. They are defined like this:
+`ProtoRPC` 类也继承了一对属性，`responseHeaders` 和 `responseTrailers`， 类似于请求元数据，我们只是看着而是由服务器向客户端发回。它们的定义如下：
 
 ```objective-c
 @property(atomic, readonly) NSDictionary *responseHeaders;
 @property(atomic, readonly) NSDictionary *responseTrailers;
 ```
 
-In OAuth2, if there's an authentication error the server will send back a challenge header. This is returned in the RPC's response headers. To access this, as in our example's error-handling code, you write:
+在 OAuth2 中，如果验证出错，服务器会返回一个挑战头。它通过 RPC 的应答头返回。要访问这个，如我们例子中的错误处理的代码，你可以这么写：
 
 ```objective-c
 call.responseHeaders[@"www-authenticate"]
 ```
 
-Note that, as gRPC metadata elements are mapped to HTTP/2 headers (or trailers), the keys of the
-response metadata are always ASCII strings in lowercase.
-
-Many uses cases of response metadata involve getting more details about an RPC error. For convenience,
-when a `NSError` instance is passed to an RPC handler block, the response headers and trailers dictionaries can
-also be accessed this way:
+注意，gRPC 的元数据元素可以映射到 HTTP/2 的头（或者尾），应答元数据的键永远是小写的 ASCII 码字符串。
+许多应答元数据的使用场景都涉及如何拿到关于一个 RPC 错误的更多细节。简单起见，当 RPC 的处理块传入一个 `NSError` 实例时，应答头和尾词典也可以这种方式访问：
 
 ```objective-c
 error.userInfo[kGRPCHeadersKey] == call.responseHeaders
 error.userInfo[kGRPCTrailersKey] == call.responseTrailers
 ```
-

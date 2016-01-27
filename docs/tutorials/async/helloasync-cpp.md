@@ -1,7 +1,3 @@
----
-layout: docs
-title: Asynchronous Basics - C++
----
 # 异步基础: C++
 
 本教程介绍如何使用 C++ 的 gRPC 异步/非阻塞 API 去实现简单的服务器和客户端。假设你已经熟悉实现同步 gRPC 代码，如[gRPC 基础: C++](/docs/tutorials/basic/c.html)所描述的。本教程中的例子基本来自我们在[overview](/docs/index.html)中使用的[Greeter 例子](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/cpp/helloworld)。你可以在 [grpc/examples/cpp/helloworld](https://github.com/grpc/grpc/tree/{{ site.data.config.grpc_release_branch }}/examples/cpp/helloworld)找到安装指南。
@@ -11,7 +7,7 @@ title: Asynchronous Basics - C++
 gRPC 的异步操作使用[`CompletionQueue`](http://www.grpc.io/grpc/cpp/classgrpc_1_1_completion_queue.html)。 基本工作流如下：
 
 - 在 RPC 调用上绑定一个 `CompletionQueue`
-- 做一些事情如读取或者写入，以 `voide*` 标签展示
+- 做一些事情如读取或者写入，以唯一的 `voide*` 标签展示
 - 调用 `CompletionQueue::Next` 去等待操作结束。如果标签出现，表示对应的操作已经完成。
 
 ## 异步客户端
@@ -70,7 +66,7 @@ gRPC 的异步操作使用[`CompletionQueue`](http://www.grpc.io/grpc/cpp/classg
     service.RequestSayHello(&context, &request, &responder, &cq, &cq, (void*)1);
     ```
 
-- 等待完成队列返回标签。取到标签时，上下文，请求和回答者都准备好了。
+- 等待完成队列返回标签。当取到标签时，上下文，请求和应答器都已经准备就绪。
 
     ```
     HelloReply reply;

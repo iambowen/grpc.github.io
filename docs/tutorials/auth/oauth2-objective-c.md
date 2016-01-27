@@ -1,8 +1,3 @@
----
-layout: docs
-title: OAuth2 on gRPC - Objective-C
----
-
 # 在 gRPC 上使用 OAuth2: Objective-C
 
 这个例子展示了如何在 gRPC 上使用 OAuth2 代表用户发起身份验证 API 调用。通过它你还会学到如何
